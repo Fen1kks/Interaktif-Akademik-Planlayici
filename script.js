@@ -831,6 +831,13 @@ function drawArrows() {
    ========================================================================= */
 
 function calculateOptimalZoom() {
+  // Mobile/Tablet: Disable zoom to rely on native scrolling and avoid coordinate shifts
+  if (window.innerWidth <= 900) {
+      grid.style.zoom = "1";
+      scheduleDrawArrows();
+      return;
+  }
+
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight - 80;
   
@@ -840,11 +847,19 @@ function calculateOptimalZoom() {
     const gridWidth = grid.scrollWidth;
     const gridHeight = grid.scrollHeight;
     
+    // Only zoom if content is larger than viewport
+    if (gridWidth <= viewportWidth && gridHeight <= viewportHeight) {
+        grid.style.zoom = "1";
+        scheduleDrawArrows();
+        return;
+    }
+    
     const zoomX = (viewportWidth * 0.98) / gridWidth;
     const zoomY = (viewportHeight * 0.95) / gridHeight;
     
     const optimalZoom = Math.min(zoomX, zoomY);
-    const finalZoom = Math.max(0.4, optimalZoom);
+    // Don't shrink too much on desktop either
+    const finalZoom = Math.max(0.6, optimalZoom);
     
     grid.style.zoom = finalZoom;
     
