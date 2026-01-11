@@ -701,6 +701,7 @@ function drawArrows() {
     if (!cardCache.has(course.id)) return;
 
     course.prereqs.forEach((prereqId) => {
+      if (prereqId.match(/^\d+\s+Credits?$/i)) return; // Skip Credit Requirements (No visual arrow)
       if (!cardCache.has(prereqId)) {
           console.warn(`Prerequisite mismatch: ${prereqId} not found for ${course.id}`);
           return;
@@ -928,6 +929,9 @@ function drawArrows() {
 
              // Parallel wires
              const offsets = [-3, 3]; 
+
+             const pairColor = generateStableColor(course.id + coreqId);
+             const isPairLocked = isLocked(course.id, false) || isLocked(coreqId, false);
 
              offsets.forEach(off => {
                  const currentGutter = gutterX + off;
