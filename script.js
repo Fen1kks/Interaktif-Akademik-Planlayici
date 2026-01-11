@@ -428,7 +428,7 @@ function createCard(course) {
 
             <div class="course-credits" 
                  ${isVariable ? `onclick="toggleCredit('${course.id}', event)"` : ""}
-                 style="font-size: 0.75rem; font-weight: 600; line-height: 1.1; text-align: center; color: ${creditReq ? 'var(--c-primary)' : 'var(--c-text-muted)'}; ${variableCreditStyle}">
+                 style="font-size: 0.75rem; font-weight: 600; line-height: 1.1; text-align: center; color: ${isVariable || creditReq ? 'var(--c-primary)' : 'var(--c-text-muted)'}; ${variableCreditStyle}">
                  ${creditDisplay}
             </div>
 
