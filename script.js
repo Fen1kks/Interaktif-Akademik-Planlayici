@@ -73,6 +73,9 @@ function switchDepartment(code) {
     });
     
     loadDepartment(code);
+    
+    // Close Dropdown
+    deptSelector.classList.remove("active");
 }
 
 function loadDepartment(code) {
