@@ -644,9 +644,12 @@ function drawArrows() {
       let hopY = targetY; 
       
       // Responsive constraints for mobile tightness
-      const collisionStartOffset = window.innerWidth <= 900 ? 20 : 60;
-      const collisionEndOffset = window.innerWidth <= 900 ? 20 : 40;
-      const longArrowThreshold = window.innerWidth <= 900 ? 100 : 250;
+      const collisionStartOffset = 10;
+      const collisionEndOffset = 10;
+      // Threshold must be < (CardWidth + Gap) to detect single-column skips. 
+      // Gap is ~30-50px. Card is ~150px. Total ~200px. 
+      // So 60px is a safe threshold to distinguish "Adjacent" vs "Skipping".
+      const longArrowThreshold = 60; 
 
       if (gap > longArrowThreshold) {
           const blockStart = sourceX + collisionStartOffset;
@@ -718,7 +721,7 @@ function drawArrows() {
        // Responsive Gutter Base & Thresholds
        const isMobile = window.innerWidth <= 900;
        const gutterBase = isMobile ? 10 : 32;
-       const longArrowThreshold = isMobile ? 100 : 250; // Lower threshold to detect column skips on mobile
+       const longArrowThreshold = 60; // Consistent with Logic Phase
        const r = isMobile ? 4 : 8; // Tighter radius on mobile
 
        let d = "";
