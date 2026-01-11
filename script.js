@@ -1028,7 +1028,7 @@ function drawArrows() {
                      path.setAttribute("stroke-dasharray", "0, 7"); 
                      path.setAttribute("stroke-linecap", "round");
                      strokeWidth = "4"; 
-                     baseOpacity = "0.85";
+                     baseOpacity = isPairLocked ? "0.5" : "0.85";
                  } else if (isPairLocked) {
                      path.setAttribute("stroke-dasharray", "4,4");
                      baseOpacity = "0.5";
