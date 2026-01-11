@@ -319,6 +319,10 @@ function createCard(course) {
     data.completed ? "completed" : ""
   } ${data.grade === "FF" ? "failed" : ""}`;
 
+  if (course.name === "Summer Practice") {
+      card.classList.add("summer-practice");
+  }
+
   const prereqText = course.prereqs.length
     ? `Prereqs: ${course.prereqs.join(", ")}`
     : "No Prerequisites";
