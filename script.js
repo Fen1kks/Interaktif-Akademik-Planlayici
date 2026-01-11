@@ -794,29 +794,36 @@ function drawArrows() {
          const targetMetrics = cardCache.get(coreqId);
          if (!targetMetrics) return;
 
-         // Only draw one set of lines per pair (Source above Target)
-         if (sourceMetrics.cy < targetMetrics.cy) {
-             const x_short = sourceMetrics.x + sourceMetrics.w / 2;
-             const y1_short = sourceMetrics.y + sourceMetrics.h; // Bottom of source (Short)
-             const y1_long = sourceMetrics.cy; // Center of source (Long/Extended Up)
-             const y2 = targetMetrics.y; // Top of target (Constant)
+             // Draw two parallel lines in the gutter (Right Side) to avoid cutting through middle cards
+             const gutterX = sourceMetrics.x + sourceMetrics.w + (window.innerWidth <= 900 ? 6 : 10);
+             const r = window.innerWidth <= 900 ? 6 : 10;
              
-             // Draw two parallel lines
-             const offset = 4;
-             const pairColor = generateStableColor(course.id + coreqId); 
+             // Bracket style path
+             // Start from Center-Right of Source
+             // Curve to Vertical Line
+             // Go down/up to Target Center-Right
              
-             // Check lock state for visual styling
-             const isPairLocked = isLocked(course.id) || isLocked(coreqId);
+             const ySource = sourceMetrics.cy;
+             const yTarget = targetMetrics.cy;
+             const cardRight = sourceMetrics.x + sourceMetrics.w;
 
-             [ -offset, offset ].forEach(off => {
-                 const x = x_short + off;
-                 const dShort = `M ${x} ${y1_short} L ${x} ${y2}`;
-                 const dLong = `M ${x} ${y1_long} L ${x} ${y2}`;
+             // Parallel wires
+             const offsets = [-3, 3]; 
+
+             offsets.forEach(off => {
+                 const currentGutter = gutterX + off;
                  
+                  // Path: Start (Card Right Edge) -> Line to Gutter -> Vertical -> Line to Target (Card Right Edge)
+                  const d = `M ${cardRight} ${ySource} ` +
+                           `L ${currentGutter - r} ${ySource} ` +
+                           `Q ${currentGutter} ${ySource} ${currentGutter} ${ySource + r * (yTarget > ySource ? 1 : -1)} ` +
+                           `L ${currentGutter} ${yTarget - r * (yTarget > ySource ? 1 : -1)} ` +
+                           `Q ${currentGutter} ${yTarget} ${currentGutter - r} ${yTarget} ` +
+                           `L ${cardRight} ${yTarget}`;
+
                  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                 path.setAttribute("d", dShort); 
-                 path.setAttribute("data-d-short", dShort);
-                 path.setAttribute("data-d-long", dLong);
+                 path.setAttribute("d", d); 
+                 path.setAttribute("fill", "none"); // Ensure no fill for lines
 
                  path.setAttribute("stroke", pairColor);
                  const strokeWidth = window.innerWidth <= 900 ? "0.8" : "3";
@@ -837,8 +844,7 @@ function drawArrows() {
                  path.setAttribute("data-original-color", pairColor);
                   
                   svg.appendChild(path);
-              });
-          }
+               });
       });
   });
 }
