@@ -1062,11 +1062,9 @@ document.addEventListener('click', (e) => {
         
         try {
             // Clear all department states
-            let clearedCount = 0;
             Object.keys(localStorage).forEach(key => {
                 if (key.startsWith("gpaState_")) {
                     localStorage.removeItem(key);
-                    clearedCount++;
                 }
             });
             // Also legacy key just in case
@@ -1074,8 +1072,12 @@ document.addEventListener('click', (e) => {
                     localStorage.removeItem("courseState");
             }
             
-            alert(`Veriler başarıyla temizlendi.`);
-            window.location.reload();
+            // Reset internal state and re-render immediately
+            state = {};
+            render();
+            calculateMetrics();
+            
+            console.log("Data cleared successfully");
         } catch (err) {
             console.error("Reset failed:", err);
             alert("Hata: " + err.message);
