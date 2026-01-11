@@ -79,6 +79,25 @@ function switchDepartment(code) {
 }
 
 function loadDepartment(code) {
+    // GUARD: Check if data exists
+    if (!window.departments || !window.departments[code]) {
+        console.warn(`Department '${code}' not found or data missing.`);
+        
+        // Attempt Fallback
+        const available = window.departments ? Object.keys(window.departments) : [];
+        if (available.length > 0) {
+            console.log(`Falling back to '${available[0]}'`);
+            if (code !== available[0]) {
+                localStorage.setItem("lastDept", available[0]);
+                loadDepartment(available[0]);
+                return;
+            }
+        } else {
+            console.error("CRITICAL: No department data available to load.");
+            return;
+        }
+    }
+
     const deptData = window.departments[code];
     curriculum = deptData.curriculum; // Shallow copy reference
     
@@ -95,13 +114,18 @@ function loadDepartment(code) {
     });
 
     // Load State for this Department
-    state = JSON.parse(localStorage.getItem(`gpaState_${code}`)) || {};
+    try {
+        state = JSON.parse(localStorage.getItem(`gpaState_${code}`)) || {};
+    } catch (e) {
+        console.warn("Resetting corrupt state for", code);
+        state = {};
+    }
 
     // Re-render
     render();
     
     // Draw immediately (initial pass) to ensure visibility
-    try { drawArrows(); } catch(e) { console.error(e); }
+    try { drawArrows(); } catch(e) { console.error("Draw error:", e); }
 
     // Recalculate zoom (and redraw) once layout settles
     setTimeout(() => {
@@ -195,7 +219,8 @@ function updateThemeIcon(isDark) {
    4. LOGIC ENGINE (LOCKING & METRICS)
    ========================================================================= */
 function getCourse(id) {
-  return curriculum.find((c) => c.id === id);
+    if (!curriculum) return undefined;
+    return curriculum.find((c) => c.id === id);
 }
 
 function isLocked(courseId, checkCoreqs = true, ignoreCreditLimit = false) {

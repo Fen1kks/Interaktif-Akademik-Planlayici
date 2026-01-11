@@ -13,6 +13,7 @@
     <div id="debug-overlay" style="position:fixed; top:0; left:0; width:100%; height:200px; background:rgba(0,0,0,0.9); color:#0f0; font-family:monospace; padding:10px; z-index:10000; overflow:auto; display:none;">
         <div style="border-bottom: 1px solid #333; margin-bottom: 5px;">
             <strong>System Diagnostics</strong> 
+            <button onclick="localStorage.clear(); window.location.reload();" style="float:right; color: #f55; margin-left:10px;">RESET DATA</button>
             <button onclick="this.parentElement.parentElement.style.display='none'" style="float:right; color: white;">Close</button>
         </div>
         <div id="debug-log">Initializing...</div>
