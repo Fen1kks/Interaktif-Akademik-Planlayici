@@ -133,7 +133,7 @@ function updateState(courseId, isCompleted, grade, skipRender = false) {
 }
 
 function cascadeUncheck(courseId) {
-  const dependents = curriculum.filter((c) => c.prereqs.includes(courseId));
+  const dependents = curriculum.filter((c) => c.prereqs.some(p => p.replace("!", "") === courseId));
 
   dependents.forEach((dep) => {
     if (state[dep.id] && state[dep.id].completed) {
@@ -742,8 +742,11 @@ function drawArrows() {
   curriculum.forEach((course) => {
     if (!cardCache.has(course.id)) return;
 
-    course.prereqs.forEach((prereqId) => {
-      if (prereqId.match(/^\d+\s+Credits?$/i)) return; // Skip Credit Requirements (No visual arrow)
+    course.prereqs.forEach((pString) => {
+      if (pString.match(/^\d+\s+Credits?$/i)) return; // Skip Credit Requirements (No visual arrow)
+      
+      const prereqId = pString.replace("!", "");
+
       if (!cardCache.has(prereqId)) {
           console.warn(`Prerequisite mismatch: ${prereqId} not found for ${course.id}`);
           return;
@@ -779,7 +782,9 @@ function drawArrows() {
     const targetX = targetMetrics.x;
     const targetYBase = targetMetrics.cy;
 
-    course.prereqs.forEach((prereqId) => {
+    course.prereqs.forEach((pString) => {
+      const isWeak = pString.endsWith("!");
+      const prereqId = pString.replace("!", "");
       if (!cardCache.has(prereqId)) return;
       
       const sourceMetrics = cardCache.get(prereqId);
@@ -836,7 +841,7 @@ function drawArrows() {
       verticalLanes[gutterKey].push({
           id: arrowId,
           sourceX, sourceY, targetX, targetY, hopY, gap,
-          courseId: course.id, prereqId
+          courseId: course.id, prereqId, isWeak
       });
     });
   });
@@ -872,7 +877,7 @@ function drawArrows() {
 
   // 3. DRAW PHASE
   Object.values(verticalLanes).flat().forEach(arrow => {
-       const { sourceX, sourceY, targetX, targetY, hopY, gap, id, courseId, prereqId } = arrow;
+       const { sourceX, sourceY, targetX, targetY, hopY, gap, id, courseId, prereqId, isWeak } = arrow;
        
        const channelOffset = gutterAssignments[id] || 0;
        const gapOffset = gapAssignments[id] || 0;
@@ -928,7 +933,11 @@ function drawArrows() {
       let strokeColor = generateStableColor(prereqId);
       let baseOpacity = "0.9";
       
-      if (!isPrereqCompleted) {
+      if (isWeak) {
+          path.setAttribute("stroke-dasharray", "1,5"); // Dotted
+          path.setAttribute("stroke-linecap", "round");
+          baseOpacity = isPrereqCompleted ? "0.9" : "0.5";
+      } else if (!isPrereqCompleted) {
         path.setAttribute("stroke-dasharray", "5,5");
         baseOpacity = "0.5";
       }
