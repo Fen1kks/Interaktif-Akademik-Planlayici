@@ -751,6 +751,10 @@ function drawArrows() {
       
       const prereqId = pString.replace("!", "");
 
+      // OPTIMIZATION: If this is also a Co-requisite, skip the standard arrow
+      // because the Co-req loop will draw a cleaner, direct vertical line.
+      if (course.coreqs && course.coreqs.includes(prereqId)) return;
+
       if (!cardCache.has(prereqId)) {
           console.warn(`Prerequisite mismatch: ${prereqId} not found for ${course.id}`);
           return;
@@ -987,14 +991,20 @@ function drawArrows() {
          const targetMetrics = cardCache.get(coreqId);
          if (!targetMetrics) return;
 
-              // Connection Points: Bottom of Source -> Top of Target
-              const xSource = sourceMetrics.x + sourceMetrics.w / 2;
-              const ySource = sourceMetrics.y + sourceMetrics.h;
-              const xTarget = targetMetrics.x + targetMetrics.w / 2;
-              const yTarget = targetMetrics.y; // Connect to TOP of target (Shortest Path)
-              
-              // Parallel wires
-              const offsets = [-3, 3]; 
+         // FIX: Determine which card is visually higher to draw clean Top->Bottom lines
+         // regardless of which ID is alphabetically "first"
+         const isSourceHigher = sourceMetrics.y < targetMetrics.y;
+         const topMetrics = isSourceHigher ? sourceMetrics : targetMetrics;
+         const botMetrics = isSourceHigher ? targetMetrics : sourceMetrics;
+
+         // Connection Points: Bottom of Top Card -> Top of Bottom Card
+         const xSource = topMetrics.x + topMetrics.w / 2;
+         const ySource = topMetrics.y + topMetrics.h;
+         const xTarget = botMetrics.x + botMetrics.w / 2;
+         const yTarget = botMetrics.y; 
+         
+         // Parallel wires
+         const offsets = [-3, 3]; 
 
               const pairColor = generateStableColor(course.id + coreqId);
               const isPairLocked = isLocked(course.id, false) || isLocked(coreqId, false);
