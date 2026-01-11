@@ -489,20 +489,20 @@ body {
   }
   
   .course-credits {
-      font-size: 0.6rem !important;
+      font-size: 0.7rem !important; /* Increased from 0.6rem */
   }
   
   .card-controls {
-      padding-top: 0.2rem;
+      padding: 0.3rem 6px; /* Added side padding */
       gap: 0.4rem;
-      justify-content: space-between; /* Distribute items like desktop */
-      width: 100%; /* Ensure full width usage */
+      justify-content: space-between; 
+      width: 100%; 
   }
   
   /* Compact Checkbox */
   .custom-checkbox {
-      width: 14px;
-      height: 14px;
+      width: 16px; /* Increased from 14px */
+      height: 16px; 
       border-radius: 3px;
   }
   .custom-checkbox svg {
@@ -513,9 +513,9 @@ body {
   
   /* Compact Grade Select */
   .grade-select {
-      font-size: 0.7rem;
+      font-size: 0.75rem; /* Increased from 0.7rem */
       padding: 0 0.2rem;
-      height: 18px;
+      height: 22px; /* Increased from 18px */
   }
 
   /* Adjust Term Header */
