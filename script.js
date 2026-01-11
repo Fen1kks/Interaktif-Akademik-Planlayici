@@ -200,17 +200,35 @@ function isLocked(courseId, checkCoreqs = true, ignoreCreditLimit = false) {
   if (!course) return false;
 
   // 1. Check Own Prereqs
-  const ownLocked = course.prereqs.some((pId) => {
+  // 1. Check Own Prereqs
+  const ownLocked = course.prereqs.some((pString) => {
     // Check for Credit Requirement (e.g. "100 Credits")
-    const creditMatch = pId.match(/^(\d+)\s+Credits?$/i);
+    const creditMatch = pString.match(/^(\d+)\s+Credits?$/i);
     if (creditMatch) {
         if (ignoreCreditLimit) return false; // Ignore during calculation phase
         const required = parseInt(creditMatch[1], 10);
         return (window.currentTotalCredits || 0) < required;
     }
 
+    // Check for "Weak" Prerequisite (ends with '!')
+    // e.g. "MATH101!" -> FF is allowed (only attendance required)
+    let pId = pString;
+    let allowFF = false;
+    if (pId.endsWith("!")) {
+        pId = pId.slice(0, -1);
+        allowFF = true;
+    }
+
     const pState = state[pId];
-    return !pState || !pState.completed || pState.grade === "FF";
+    
+    // If not taken at all, it's locked
+    if (!pState || pState.grade === "") return true;
+
+    // If weak prereq, any grade (including FF) is fine
+    if (allowFF) return false;
+
+    // Standard Prereq: Must be completed and NOT FF
+    return !pState.completed || pState.grade === "FF";
   });
   
   if (ownLocked) return true;
