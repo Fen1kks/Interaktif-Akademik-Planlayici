@@ -1041,25 +1041,40 @@ window.addEventListener("resize", () => {
 // START
 // START
 // Initialize the system once all scripts are loaded
+// Initialize the system once all scripts are loaded
 window.addEventListener('load', () => {
     initSystem();
-
-    // Reset Button Logic
-    const resetBtn = document.getElementById("reset-btn");
-    if (resetBtn) {
-        resetBtn.addEventListener("click", () => {
-            if (confirm("Are you sure you want to reset ALL data? This cannot be undone.")) {
-                Object.keys(localStorage).forEach(key => {
-                    if (key.startsWith("gpaState_")) {
-                        localStorage.removeItem(key);
-                    }
-                });
-                location.reload();
-            }
-        });
-    }
-
     setTimeout(() => {
         calculateOptimalZoom();
     }, 50);
+});
+
+// Setup Global Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // Reset Button Logic
+    const resetBtn = document.getElementById("reset-btn");
+    console.log("Reset button found:", resetBtn);
+    
+    if (resetBtn) {
+        resetBtn.addEventListener("click", (e) => {
+            e.preventDefault(); // Prevent any default form submission if applicable
+            console.log("Reset button clicked");
+            
+            if (confirm("Are you sure you want to reset ALL data? This cannot be undone.")) {
+                try {
+                    // Clear all department states
+                    Object.keys(localStorage).forEach(key => {
+                        if (key.startsWith("gpaState_")) {
+                            localStorage.removeItem(key);
+                        }
+                    });
+                    console.log("Data cleared");
+                    window.location.reload();
+                } catch (err) {
+                    console.error("Reset failed:", err);
+                    alert("Error resetting data. Check console.");
+                }
+            }
+        });
+    }
 });
