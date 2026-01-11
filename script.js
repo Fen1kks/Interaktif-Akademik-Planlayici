@@ -607,7 +607,9 @@ function generateStableColor(str) {
   
   const colorPalette = [
     '#4965CD', '#E1497D', '#9C5B07', '#F9364E', '#20AA6C',
-    '#375EC5', '#87D305', '#AD11D5', '#2843F5', '#74ED9F'
+    '#375EC5', '#87D305', '#AD11D5', '#2843F5', '#74ED9F',
+    '#1ABC9C', '#E67E22', '#9B59B6', '#34495E', '#D35400', 
+    '#C0392B', '#16A085', '#8E44AD', '#2C3E50', '#F39C12'
   ];
   
   const index = Math.abs(hash) % colorPalette.length;
