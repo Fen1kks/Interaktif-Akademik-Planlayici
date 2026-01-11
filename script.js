@@ -721,9 +721,9 @@ function drawArrows() {
        
        // Responsive Gutter Base & Thresholds
        const isMobile = window.innerWidth <= 900;
-       const gutterBase = isMobile ? 10 : 32;
-       const longArrowThreshold = 60; // Consistent with Logic Phase
-       const r = isMobile ? 4 : 8; // Tighter radius on mobile
+       const gutterBase = isMobile ? 18 : 32; // Increased from 10 to 18 for straight exit
+       const longArrowThreshold = 60; 
+       const r = isMobile ? 8 : 8; // Consistent radius
 
        let d = "";
        
@@ -799,8 +799,9 @@ function drawArrows() {
          if (!targetMetrics) return;
 
              // Draw two parallel lines in the gutter (Right Side) to avoid cutting through middle cards
-             const gutterX = sourceMetrics.x + sourceMetrics.w + (window.innerWidth <= 900 ? 6 : 10);
-             const r = window.innerWidth <= 900 ? 6 : 10;
+             // Increased offset to 18px (mobile) to allow straight line before turn
+             const gutterX = sourceMetrics.x + sourceMetrics.w + (window.innerWidth <= 900 ? 18 : 20);
+             const r = 8; 
              
              // Bracket style path
              // Start from Center-Right of Source
