@@ -9,62 +9,7 @@
     <link rel="stylesheet" href="style.css?v=2" />
   </head>
   <body>
-    <!-- DIAGNOSTIC OVERLAY: Checking for live site errors -->
-    <div id="debug-overlay" style="position:fixed; top:0; left:0; width:100%; height:200px; background:rgba(0,0,0,0.9); color:#0f0; font-family:monospace; padding:10px; z-index:10000; overflow:auto; display:none;">
-        <div style="border-bottom: 1px solid #333; margin-bottom: 5px;">
-            <strong>System Diagnostics</strong> 
-            <button onclick="localStorage.clear(); window.location.reload();" style="float:right; color: #f55; margin-left:10px;">RESET DATA</button>
-            <button onclick="this.parentElement.parentElement.style.display='none'" style="float:right; color: white;">Close</button>
-        </div>
-        <div id="debug-log">Initializing...</div>
-    </div>
-    <script>
-        (function() {
-            const logBox = document.getElementById("debug-log");
-            const overlay = document.getElementById("debug-overlay");
-            
-            // Show overlay if on GitHub Pages
-            if (window.location.hostname.includes("github.io")) {
-                overlay.style.display = "block";
-            }
-            
-            function log(msg, color="#0f0") {
-                const ln = document.createElement("div");
-                ln.innerHTML = `[${new Date().toLocaleTimeString()}] <span style="color:${color}">${msg}</span>`;
-                logBox.appendChild(ln);
-                console.log(msg);
-            }
 
-            window.addEventListener("error", function(e) {
-                log(`ERROR: ${e.message} at ${e.filename}:${e.lineno}`, "#f55");
-            });
-
-            window.addEventListener("load", function() {
-                log("Window Loaded. Checking resources...");
-                
-                setTimeout(() => {
-                    const depts = window.departments || {};
-                    const deptCount = Object.keys(depts).length;
-                    
-                    if (deptCount === 0) {
-                        log("CRITICAL: No Departments Loaded! (window.departments is empty)", "#f00");
-                        log("Check 404s in Network Tab. Attempting to fetch directly...", "#ff0");
-                        
-                        fetch("data/registry.js?v=2").then(r => log("Registry fetch: " + r.status)).catch(e => log("Registry fetch fail: " + e.message, "#f00"));
-                        fetch("data/me.js?v=2").then(r => log("ME data fetch: " + r.status)).catch(e => log("ME fetch fail: " + e.message, "#f00"));
-                    } else {
-                        log(`SUCCESS: ${deptCount} departments loaded.`, "#0f0");
-                        // If logic fails after load, check if script.js ran
-                        if (typeof window.initSystem !== 'function') {
-                             log("CRITICAL: script.js did not load initSystem!", "#f00");
-                        }
-                    }
-                }, 1000);
-            });
-            
-            log("Diagnostics active.");
-        })();
-    </script>
     <header class="stats-bar">
       <div class="brand">
         <div class="department-selector" id="dept-selector">
