@@ -350,7 +350,8 @@ function createCard(course) {
   const creditReq = course.prereqs.find(p => p.match(/^\d+\s+Credits?$/i));
   
   if (creditReq) {
-      creditDisplay = `Req: ${creditReq}`;
+      const num = creditReq.match(/\d+/)[0];
+      creditDisplay = `Req: ${num}<br>Credits`;
   }
 
   // Interactive Logic
@@ -390,7 +391,7 @@ function createCard(course) {
                 </div>
             </label>
 
-            <div class="course-credits" style="font-size: 0.75rem; font-weight: 600; color: ${creditReq ? 'var(--c-primary)' : 'var(--c-text-muted)'};">${creditDisplay}</div>
+            <div class="course-credits" style="font-size: 0.75rem; font-weight: 600; line-height: 1.1; text-align: left; color: ${creditReq ? 'var(--c-primary)' : 'var(--c-text-muted)'};">${creditDisplay}</div>
 
             <select class="grade-select" ${locked ? "disabled" : ""} style="${selectStyle}">
                 <option value="" ${data.grade === "" || !data.grade ? "selected" : ""}>--</option>
@@ -1012,8 +1013,8 @@ window.addEventListener("resize", () => {
 // START
 // Initialize the system once all scripts are loaded
 window.addEventListener('load', () => {
-    
-  setTimeout(() => {
-    calculateOptimalZoom();
-  }, 50);
+    initSystem();
+    setTimeout(() => {
+        calculateOptimalZoom();
+    }, 50);
 });
