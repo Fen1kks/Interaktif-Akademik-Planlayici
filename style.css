@@ -570,11 +570,7 @@ body {
     font-size: 0.65rem;
   }
   
-  /* Larger touch targets for checkboxes on mobile */
-  .custom-checkbox {
-      width: 30px;
-      height: 30px;
-  }
+
 }
 
 /* Attribution Footer */
