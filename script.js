@@ -238,7 +238,8 @@ function isLocked(courseId, checkCoreqs = true, ignoreCreditLimit = false) {
 
   // 2. Check Co-req Prereqs (Mutual Locking)
   if (checkCoreqs && course.coreqs && course.coreqs.length > 0) {
-      const coreqLocked = course.coreqs.some(coreqId => {
+      const coreqLocked = course.coreqs.some(cString => {
+          const coreqId = cString.replace("!", "");
           // Call Recursively but disable further coreq checks to avoid infinite loop
           return isLocked(coreqId, false, ignoreCreditLimit);
       });
@@ -976,7 +977,10 @@ function drawArrows() {
      const sourceMetrics = cardCache.get(course.id);
      if (!sourceMetrics) return;
 
-     course.coreqs.forEach(coreqId => {
+     course.coreqs.forEach(cString => {
+         const isWeak = cString.endsWith("!");
+         const coreqId = cString.replace("!", "");
+
          // Prevent duplicate drawing for mutual co-reqs
          if (course.id > coreqId) return;
 
@@ -1006,14 +1010,21 @@ function drawArrows() {
                  path.setAttribute("fill", "none"); 
 
                  path.setAttribute("stroke", pairColor);
-                 const strokeWidth = window.innerWidth <= 900 ? "0.8" : "3";
-                 path.setAttribute("stroke-width", strokeWidth);
+                 let strokeWidth = window.innerWidth <= 900 ? "0.8" : "3";
                  
                  let baseOpacity = "0.9";
-                 if (isPairLocked) {
+                 
+                 if (isWeak) { // Weak Co-req Styling
+                     path.setAttribute("stroke-dasharray", "0, 7"); 
+                     path.setAttribute("stroke-linecap", "round");
+                     strokeWidth = "4"; 
+                     baseOpacity = "0.85";
+                 } else if (isPairLocked) {
                      path.setAttribute("stroke-dasharray", "4,4");
                      baseOpacity = "0.5";
                  }
+
+                 path.setAttribute("stroke-width", strokeWidth);
                  path.style.opacity = baseOpacity;
                  path.setAttribute("data-base-opacity", baseOpacity);
                  
