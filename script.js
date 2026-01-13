@@ -35,6 +35,11 @@ let state = {};      // Will be loaded dynamically
 
 // Initialize System
 function initSystem() {
+    // 0. Initialize Theme Manager
+    if (window.ThemeManager) {
+        window.ThemeManager.init();
+    }
+
     // 1. Populate Dropdown
     const codes = Object.keys(window.departments);
     deptDropdown.innerHTML = codes.map(code => 
@@ -174,49 +179,10 @@ function cascadeUncheck(courseId) {
 
 
 /* =========================================================================
-   3. THEME MANAGEMENT
+   3. THEME MANAGEMENT (Handled by theme.js)
    ========================================================================= */
+// Logic migrated to ThemeManager
 
-const savedTheme = localStorage.getItem("theme");
-const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-if (savedTheme === "dark" || (!savedTheme && systemPrefersDark)) {
-  document.documentElement.setAttribute("data-theme", "dark");
-  updateThemeIcon(true);
-} else {
-    updateThemeIcon(false);
-}
-
-const themeToggles = document.querySelectorAll(".theme-toggle");
-themeToggles.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
-      if (isDark) {
-        document.documentElement.removeAttribute("data-theme");
-        localStorage.setItem("theme", "light");
-        updateThemeIcon(false);
-      } else {
-        document.documentElement.setAttribute("data-theme", "dark");
-        localStorage.setItem("theme", "dark");
-        updateThemeIcon(true);
-      }
-      scheduleDrawArrows();
-    });
-});
-
-function updateThemeIcon(isDark) {
-  // Update ALL sun/moon icons
-  const sunIcons = document.querySelectorAll(".sun-icon");
-  const moonIcons = document.querySelectorAll(".moon-icon");
-  
-  if (isDark) {
-    sunIcons.forEach(i => i.style.display = "none");
-    moonIcons.forEach(i => i.style.display = "block");
-  } else {
-    sunIcons.forEach(i => i.style.display = "block");
-    moonIcons.forEach(i => i.style.display = "none");
-  }
-}
 
 // 3. Bind Reset Buttons (Desktop & Mobile)
 const resetBtns = document.querySelectorAll(".reset-btn");

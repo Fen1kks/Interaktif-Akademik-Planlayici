@@ -1,62 +1,5 @@
 /* =========================================================================
-   1. VARIABLES & THEME CONFIGURATION
-   ========================================================================= */
-:root {
-  /* Premium HSL Color Palette - Engineering & Academic Tone */
-  --hue-primary: 215;
-  --hue-success: 150;
-  --hue-warning: 35;
-  --hue-danger: 0;
-  --hue-neutral: 220;
-
-  --c-bg: hsl(var(--hue-neutral), 20%, 97%);
-  --c-surface: #ffffff;
-  --c-surface-border: #e2e8f0;
-  --c-text-main: hsl(var(--hue-neutral), 40%, 15%);
-  --c-text-muted: hsl(var(--hue-neutral), 20%, 50%);
-
-  --c-primary: hsl(var(--hue-primary), 90%, 45%);
-  --c-primary-light: hsl(var(--hue-primary), 80%, 92%);
-
-  --c-success: hsl(var(--hue-success), 70%, 40%);
-  --c-locked: hsl(var(--hue-neutral), 15%, 90%);
-
-  --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
-  --shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-
-  --radius-md: 12px;
-  --radius-sm: 8px;
-
-  --anim-speed: 0.3s;
-}
-
-[data-theme="dark"] {
-  /* Tokyo Night Theme Palette */
-  --hue-primary: 220; 
-  
-  --c-bg: #1a1b26; 
-  --c-surface: #24283b; 
-  --c-surface-border: #414868; 
-  
-  --c-text-main: #c0caf5; 
-  --c-text-muted: #565f89; 
-  --c-text-primary: #15161e; 
-  
-  --c-primary: #7aa2f7; 
-  --c-primary-light: #2f334d; 
-  
-  --c-success: #9ece6a; 
-  --c-danger: #f7768e; 
-  --hue-warning: 35; 
-  
-  --c-locked: #16161e; 
-  
-  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-  --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
-}
-
-/* =========================================================================
-   2. GLOBAL RESET & BASE STYLES
+   1. GLOBAL RESET & BASE STYLES
    ========================================================================= */
 * {
   box-sizing: border-box;
@@ -69,19 +12,17 @@
 body {
   background-color: var(--c-bg);
   color: var(--c-text-main);
-  /* input-security: none; REMOVED invalid property */
   height: 100vh;
-  /* Fallback for browsers that don't support dvh */
   height: 100dvh; 
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Keep body hidden, scroll wrapper */
+  overflow: hidden;
   -webkit-text-size-adjust: none;
   text-size-adjust: none;
 }
 
 /* =========================================================================
-   3. HEADER & STATS BAR
+   2. HEADER & STATS BAR
    ========================================================================= */
 .stats-bar {
   background: var(--c-surface);
@@ -231,8 +172,6 @@ body {
   color: white;
 }
 
-
-
 .brand span {
   font-weight: 400;
   color: var(--c-text-muted);
@@ -306,7 +245,7 @@ body {
 }
 
 /* =========================================================================
-   4. LAYOUT & GRID
+   3. LAYOUT & GRID
    ========================================================================= */
 .grid-wrapper {
   flex: 1;
@@ -385,7 +324,7 @@ body {
 }
 
 /* =========================================================================
-   5. COURSE CARDS
+   4. COURSE CARDS
    ========================================================================= */
 .course-card {
   background: var(--c-surface);
@@ -498,7 +437,7 @@ body {
 }
 
 /* =========================================================================
-   6. CONTROLS (Checkbox & Select)
+   5. CONTROLS (Checkbox & Select)
    ========================================================================= */
 .card-controls {
   display: flex;
@@ -579,10 +518,7 @@ body {
 }
 
 /* =========================================================================
-   7. VISUALS & ARROWS
-   ========================================================================= */
-/* =========================================================================
-   7. VISUALS & ARROWS
+   6. VISUALS & ARROWS
    ========================================================================= */
 #arrows-container {
   position: absolute;
@@ -613,11 +549,8 @@ body {
   stroke-dasharray: 4; 
 }
 
-/* ... existing code ... */
-
 /* Tablet & Mobile Spacing Optimizations */
 @media (max-width: 900px) {
-  /* ... existing code ... */
   
   /* Mobile Specific Arrow Thinning */
   .arrow-path {
@@ -628,31 +561,30 @@ body {
   }
 
   .curriculum-grid {
-    gap: 0 2.5rem; /* Increased from 1.5rem to 2.5rem for WIDE arrow lanes */
+    gap: 0 2.5rem;
     margin: 0; 
-    /* Force padding on the container to prevent edge touching */
     padding-left: 2rem !important; 
     padding-right: 2rem !important;
     padding-bottom: 2rem;
   }
 
   .course-card + .course-card {
-    margin-top: 1rem; /* Restored to 1rem for arrow space */
+    margin-top: 1rem;
   }
   
   .term-column {
-    gap: 0.75rem; /* Increased from 0.25rem to push courses down slightly */
+    gap: 0.75rem;
   }
 
   /* Compact but comfortable */
   .course-card {
-      padding: 0.3rem; /* Reduced from 0.35rem */
-      min-height: 60px; /* Reduced from 65px */
+      padding: 0.3rem;
+      min-height: 60px;
       gap: 0.1rem;
   }
   
   .course-name {
-      font-size: 0.7rem; /* Reduced from 0.75rem */
+      font-size: 0.7rem;
   }
   
   .course-id {
@@ -680,11 +612,11 @@ body {
 
 @media (max-width: 600px) {
   .stats-bar {
-    padding: 0.75rem 1rem 0.5rem 1rem; /* Reduced top padding from 1.5rem to 0.75rem */
+    padding: 0.75rem 1rem 0.5rem 1rem;
   }
   
   .brand {
-      margin-bottom: 0.5rem; /* Reduced gap from 1rem to 0.5rem */
+      margin-bottom: 0.5rem;
   }
 
   .brand h1 {

@@ -18,7 +18,7 @@ Ders seçim dönemlerinde hangi dersin hangisine bağlı olduğunu (prerequisite
 - **🧮 Akıllı GPA Simülasyonu:** Geçmiş derslerinizi ve almayı planladığınız derslerin notlarını girerek kümülatif ortalamanızı (CGPA) anlık olarak hesaplayın.
 - **🔒 Kilit Sistemi (Logic Lock):** Henüz ön koşulunu vermediğiniz bir dersi seçmenizi engelleyerek hatalı program yapma riskini ortadan kaldırır.
 - **💾 LocalStorage Teknolojisi:** Üyelik gerektirmez! Tüm verileriniz sadece kendi tarayıcınızda saklanır ve sayfayı yenilediğinizde kaybolmaz.
-- **🌙 Dark Mode:** Gece çalışmaları için göz yormayan "Tokyo Night" temalı karanlık mod desteği.
+- **🎨 Gelişmiş Tema Sistemi:** Göz yormayan "Karanlık Mod", ferah "Aydınlık Mod" ve özel "Rose" teması seçenekleriyle kişiselleştirilebilir deneyim.
 - **⚡ Eş Koşul (Co-requisite) Desteği:** Laboratuvar ve teorik dersler gibi birlikte alınması gereken dersleri otomatik olarak tanır ve uyarır.
 - **⚠️ Zayıf Ön Koşul (Weak Prerequisite):** Dersi geçmiş olmanız gerekmez; sadece almış olmanız (FF olsa bile) yeterlidir. Sistemin bu özelliği, sadece devam zorunluluğu olan ön koşulları destekler.
 

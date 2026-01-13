@@ -1,0 +1,191 @@
+/* =========================================================================
+   THEME CONFIGURATION & STYLES
+   ========================================================================= */
+
+/* 1. Base Variables */
+:root {
+  /* Common Geometry */
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --anim-speed: 0.3s;
+  
+  /* Shared Hues */
+  --hue-success: 150;
+  --hue-warning: 35;
+  --hue-danger: 0;
+}
+
+/* 2. Theme Definitions */
+
+/* --- LIGHT THEME (Default) --- */
+.theme-light {
+    --c-bg: #f8fafc;
+    --c-surface: #ffffff;
+    --c-surface-border: #e2e8f0;
+    
+    --c-text-main: #1e293b;
+    --c-text-primary: #0f172a;
+    --c-text-muted: #64748b;
+
+    --c-primary: #4083c5;
+    --c-primary-light: #e0f2fe;
+    
+    --c-success: #16a34a;
+    --c-danger: #dc2626;
+    --c-locked: #f1f5f9;
+    
+    --grade-color: #cbd5e1; /* Default Fallback */
+
+    --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
+    --shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* --- DARK THEME --- */
+.theme-dark {
+    --c-bg: #1a1b26;
+    --c-surface: #24283b;
+    --c-surface-border: #414868;
+
+    --c-text-main: #c0caf5;
+    --c-text-primary: #15161e; /* Used for badges on contrast */
+    --c-text-muted: #565f89;
+
+    --c-primary: #7aa2f7;
+    --c-primary-light: #2f334d;
+
+    --c-success: #9ece6a;
+    --c-danger: #f7768e;
+    --c-locked: #16161e;
+
+    --grade-color: #414868;
+
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+}
+
+/* --- ROSE THEME --- */
+.theme-rose {
+    --c-bg: #fff0f5; /* Lavender Blush */
+    --c-surface: #ffffff;
+    --c-surface-border: #fbcfe8; /* Pink 200 */
+    
+    --c-text-main: #881337; /* Rose 900 */
+    --c-text-primary: #4c0519; /* Rose 950 */
+    --c-text-muted: #be185d; /* Rose 700 */
+
+    --c-primary: #881337; /* Soft Peach/Pink (User Request) */
+    --c-primary-light: #fdf2f8; /* Rose 50 */
+    
+    --c-success: #10b981; 
+    --c-danger: #e11d48;
+    --c-locked: #fce7f3; /* Rose 100 */
+
+    --grade-color: #fce7f3;
+
+    --shadow-sm: 0 2px 8px -2px rgba(190, 24, 93, 0.1);
+    --shadow-hover: 0 10px 25px -5px rgba(190, 24, 93, 0.15);
+}
+
+/* 3. Theme Modal UI */
+
+.theme-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    display: none; /* Hidden by default */
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.theme-modal {
+    background: var(--c-surface);
+    border: 1px solid var(--c-surface-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-hover);
+    padding: 1.5rem;
+    width: 90%;
+    max-width: 400px;
+    animation: modalIn 0.2s ease-out;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.theme-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.theme-modal-header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--c-text-main);
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    color: var(--c-text-muted);
+}
+.close-btn:hover { color: var(--c-text-main); }
+
+.theme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 1rem;
+}
+
+.theme-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.theme-option:hover {
+    transform: translateY(-2px);
+}
+
+.theme-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+}
+
+.theme-option span {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--c-text-main);
+}
+
+/* Fix Icon Alignment in Circle */
+.theme-preview > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.theme-preview svg {
+    display: block; /* Removes font baseline spacing offset */
+}
