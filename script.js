@@ -108,6 +108,7 @@ function loadDepartment(code) {
     const allIds = new Set(curriculum.map((c) => c.id));
     curriculum.forEach((c) => {
       c.prereqs = c.prereqs.filter((p) => {
+          if (typeof p === 'object' && p.type === 'count_pattern') return true;
           const cleanId = p.replace("!", "");
           return allIds.has(cleanId) || /^\d+\s+Credits?$/i.test(p);
       });
@@ -160,7 +161,7 @@ function updateState(courseId, isCompleted, grade, skipRender = false) {
 }
 
 function cascadeUncheck(courseId) {
-  const dependents = curriculum.filter((c) => c.prereqs.some(p => p.replace("!", "") === courseId));
+  const dependents = curriculum.filter((c) => c.prereqs.some(p => typeof p === 'string' && p.replace("!", "") === courseId));
 
   dependents.forEach((dep) => {
     if (state[dep.id] && state[dep.id].completed) {
@@ -246,6 +247,27 @@ function isLocked(courseId, checkCoreqs = true, ignoreCreditLimit = false) {
 
   // 1. Check Own Prereqs
   const ownLocked = course.prereqs.some((pString) => {
+    // 0. GUARD: Check for Complex Object Prereqs FIRST (Prevent crash on .match)
+    if (typeof pString === "object" && pString.type === "count_pattern") {
+         const { pattern, exclude, minCount } = pString;
+         const regex = new RegExp(pattern);
+         
+         const completedCount = curriculum.filter(targetCourse => {
+             // Match Pattern (e.g. starts with ME3)
+             if (!regex.test(targetCourse.id)) return false;
+             // Check Excludes
+             if (exclude && exclude.includes(targetCourse.id)) return false;
+             // Check if Completed
+             const s = state[targetCourse.id];
+             return s && s.completed && s.grade !== "FF";
+         }).length;
+         
+         return completedCount < minCount;
+    }
+
+    // GUARD: Ensure pString is actually a string before proceeding
+    if (typeof pString !== "string") return false;
+
     // Check for Credit Requirement (e.g. "100 Credits")
     const creditMatch = pString.match(/^(\d+)\s+Credits?$/i);
     if (creditMatch) {
@@ -256,6 +278,10 @@ function isLocked(courseId, checkCoreqs = true, ignoreCreditLimit = false) {
 
     // Check for "Weak" Prerequisite (ends with '!')
     // e.g. "MATH101!" -> FF is allowed (only attendance required)
+    
+    // B) Handle Standard String Prereqs
+
+    // B) Handle Standard String Prereqs
     let pId = pString;
     let allowFF = false;
     if (pId.endsWith("!")) {
@@ -406,6 +432,11 @@ function render() {
   });
 
   calculateMetrics();
+  
+  // Re-draw arrows after DOM update
+  setTimeout(() => {
+      scheduleDrawArrows();
+  }, 50);
 }
 
 function createCard(course) {
@@ -422,33 +453,121 @@ function createCard(course) {
       card.classList.add("summer-practice");
   }
 
-  const prereqText = course.prereqs.length
-    ? `Prereqs: ${course.prereqs.join(", ")}`
-    : "No Prerequisites";
+  // 1. Analyze Prerequisites Once
+  const stringPrereqs = course.prereqs.filter(p => typeof p === "string");
+  const complexPrereqs = course.prereqs.filter(p => typeof p === "object" && p.type === "count_pattern");
+  
+  const creditReqObj = stringPrereqs.find(p => p.match(/^\d+\s+Credits?$/i));
+  const standardPrereqs = stringPrereqs.filter(p => !p.match(/^\d+\s+Credits?$/i));
+  
+  // 2. Prepare Display Components
+  const isSummerPractice = course.name === "Summer Practice";
+  let prereqHTML = "";
+  let creditDisplayParts = [];
+
+  // 3. Logic: Header (Prereq Text)
+  if (!isSummerPractice) {
+      if (standardPrereqs.length > 0) {
+          prereqHTML = `
+            <div style="display: flex; flex-direction: column; align-items: flex-end; text-align: right;">
+                <div class="prereq-hint">Prereqs: ${standardPrereqs.join(", ")}</div>
+            </div>`;
+      } else {
+          prereqHTML = `<div class="prereq-hint">No Prerequisites</div>`;
+      }
+  } else {
+      // Summer Practice: Header Empty
+      prereqHTML = "";
+  }
 
   const gradeColor = getGradeColor(data.grade);
   card.style.setProperty(
     "--grade-color",
     data.grade === "FF" ? "#dc2626" : data.completed ? gradeColor : "#cbd5e1"
   );
-  
-  // Custom Credit Display
+
+  // 4. Logic: Footer (Credits & Requirements)
   let isVariable = Array.isArray(course.credits);
   let currentCredit = isVariable 
       ? (data.selectedCredit || course.credits[0]) 
       : course.credits;
 
-  let creditDisplay = `${currentCredit} Credit${isVariable ? " ▾" : ""}`;
-  const creditReq = course.prereqs.find(p => p.match(/^\d+\s+Credits?$/i));
+  // A) Credit Line
+  let showCreditLine = false;
+  let crText = "";
   
-  if (creditReq) {
-      const num = creditReq.match(/\d+/)[0];
-      if (currentCredit > 0) {
-          creditDisplay = `${currentCredit} Cr${isVariable ? " ▾" : ""} | Req: ${num}`;
-      } else {
-          creditDisplay = `Req: ${num}<br>Credits`;
-      }
+  if (currentCredit > 0) {
+      showCreditLine = true;
+      // "3 Credit" (Standard) vs "3 CR" (Summer Practice)
+      crText = isSummerPractice 
+          ? `${currentCredit} CR${isVariable ? " ▾" : ""}`
+          : `${currentCredit} Credit${isVariable ? " ▾" : ""}`;
   }
+
+  if (showCreditLine) {
+       creditDisplayParts.push(`<span style="font-size: 0.75rem;">${crText}</span>`);
+  }
+
+  // B) Requirements (Stacked Logic)
+  if (isSummerPractice) {
+      // Summer Practice: Stack Everything Here
+      
+      // Req: ME363 - ONLY SHOW IF COMPLEX RULES ALSO EXIST (User Request)
+      if (standardPrereqs.length > 0 && complexPrereqs.length > 0) {
+          // Changed to bright blue (primary) as requested
+          creditDisplayParts.push(`<span style="color: var(--c-primary); font-size: 0.7rem; font-weight: 600;">Req: ${standardPrereqs.join(", ")}</span>`);
+      }
+      
+      // Credit Req (if exists)
+      if (creditReqObj) {
+           const num = creditReqObj.match(/\d+/)[0];
+           creditDisplayParts.push(`<span style="font-size:0.75rem; opacity:1;">Req: ${num}<br>Credits</span>`);
+      }
+
+      // Complex Rules (ME3xx)
+      complexPrereqs.forEach(p => {
+             const { pattern, exclude, minCount, message } = p;
+             const regex = new RegExp(pattern);
+             const currentCount = curriculum.filter(c => 
+                 regex.test(c.id) && 
+                 (!exclude || !exclude.includes(c.id)) && 
+                 state[c.id] && state[c.id].completed && state[c.id].grade !== "FF"
+             ).length;
+             creditDisplayParts.push(`<span style="color: var(--c-primary); font-size:0.65rem; font-weight:700;">${message} (${currentCount}/${minCount})</span>`);
+      });
+
+  } else {
+    
+      // Legacy Credit Req
+      if (creditReqObj) {
+          const num = creditReqObj.match(/\d+/)[0];
+          if (currentCredit > 0) {
+              creditDisplayParts.push(`<span style="font-size:0.65em; opacity:0.8;">Req: ${num} CR</span>`);
+          } else {
+              creditDisplayParts.push(`<span style="font-size:0.7rem;">Req: ${num} CR<br>Credits</span>`);
+          }
+      }
+
+      // Complex (Fallback - if any standard course has complex rules, show them)
+      complexPrereqs.forEach(p => {
+             const { pattern, exclude, minCount, message } = p;
+             const regex = new RegExp(pattern);
+             const currentCount = curriculum.filter(c => 
+                 regex.test(c.id) && 
+                 (!exclude || !exclude.includes(c.id)) && 
+                 state[c.id] && state[c.id].completed && state[c.id].grade !== "FF"
+             ).length;
+             const color = currentCount >= minCount ? "var(--c-success)" : "var(--c-text-muted)";
+             creditDisplayParts.push(`<span style="color:${color}; font-size:0.65rem; font-weight:700;">${message} (${currentCount}/${minCount})</span>`);
+      });
+  }
+
+  // Fallback for 0 credit courses with no other info
+  if (creditDisplayParts.length === 0 && currentCredit === 0) {
+       creditDisplayParts.push("0 Credit");
+  }
+
+  let creditDisplay = creditDisplayParts.join("<br>");
 
   // Interactive Logic
   if (locked) {
@@ -474,7 +593,7 @@ function createCard(course) {
                 <span class="course-id">${course.id}</span>
                 <div class="course-name" title="${course.name}" style="position: relative; top: -1px;">${course.name}</div>
             </div>
-            <div class="prereq-hint">${prereqText}</div>
+            ${prereqHTML}
         </div>
         
         <div class="card-controls">
@@ -489,7 +608,7 @@ function createCard(course) {
 
             <div class="course-credits" 
                  ${isVariable ? `onclick="toggleCredit('${course.id}', event)"` : ""}
-                 style="font-size: 0.75rem; font-weight: 600; line-height: 1.1; text-align: center; color: ${isVariable || creditReq ? 'var(--c-primary)' : 'var(--c-text-muted)'}; ${variableCreditStyle}">
+                 style="font-size: 0.75rem; font-weight: 600; line-height: 1.1; text-align: center; color: ${isVariable || creditReqObj ? 'var(--c-primary)' : 'var(--c-text-muted)'}; ${variableCreditStyle}">
                  ${creditDisplay}
             </div>
 
@@ -584,6 +703,36 @@ function createCard(course) {
     
     let grayIndex = 0;
     const connectedCourses = new Map();
+
+    // 4. COMPLEX PREREQUISITE HIGHLIGHTING (Regex-based)
+    const complexPrereqs = (course.prereqs || []).filter(p => typeof p === "object" && p.type === "count_pattern");
+    
+    // Store forced colors for courses matching complex rules
+    const forcedColors = new Map();
+
+    complexPrereqs.forEach(p => {
+        const { pattern, exclude } = p;
+        const regex = new RegExp(pattern);
+
+        curriculum.forEach(c => {
+             // If matches pattern AND is not excluded AND is not the source itself
+             if (regex.test(c.id) && (!exclude || !exclude.includes(c.id)) && c.id !== course.id) {
+                 
+                 const cState = state[c.id];
+                 const isCompleted = cState && cState.completed && cState.grade !== "FF";
+                 
+                 // If taken: Blue (Primary). If not taken: Orange/Red (Warning)
+                 const highlightColor = isCompleted ? "var(--c-primary)" : "#f59e0b"; // Amber-500 equivalent
+                 
+                 forcedColors.set(c.id, highlightColor);
+
+                 // Pre-populate connectedCourses for those without arrows
+                 if (!connectedCourses.has(c.id)) {
+                      connectedCourses.set(c.id, highlightColor);
+                 }
+             }
+        });
+    });
     
     allArrows.forEach(arrow => {
       const source = arrow.getAttribute("data-source");
@@ -591,14 +740,22 @@ function createCard(course) {
       const isConnected = source === course.id || target === course.id;
       
       if (isConnected) {
-        const arrowColor = arrow.getAttribute("data-original-color");
+        let arrowColor = arrow.getAttribute("data-original-color");
+        
+        // OVERRIDE: If this arrow connects to a "Forced Color" node (e.g. ME363), use that color
+        const otherId = source === course.id ? target : source;
+        if (forcedColors.has(otherId)) {
+            arrowColor = forcedColors.get(otherId);
+        }
+
         if (source === course.id) connectedCourses.set(target, arrowColor);
         if (target === course.id) connectedCourses.set(source, arrowColor);
         
-        arrow.style.opacity = "0.9"; 
-        
+        arrow.style.opacity = "1"; // Full opacity for highlighted path
+        arrow.setAttribute("stroke", arrowColor); // Apply the color (Blue or Orange)
+
         if (arrow.hasAttribute("data-d-long")) {
-        arrow.setAttribute("d", arrow.getAttribute("data-d-long"));
+             arrow.setAttribute("d", arrow.getAttribute("data-d-long"));
         }
 
       } else {
@@ -637,10 +794,8 @@ function createCard(course) {
             e.target.closest('.grade-select') || 
             e.target.closest('.course-credits')) return;
         
-        // Stop it from bubbling to document (if we add a doc listener later)
         e.stopPropagation();
 
-        // Check if THIS card is already the active source
         if (card.classList.contains("highlight-source")) {
             resetHighlights();
         } else {
@@ -755,7 +910,7 @@ function generateStableColor(str) {
   const colorPalette = [
     '#4965CD', '#E1497D', '#9C5B07', '#F9364E', '#20AA6C',
     '#F4315A', '#87D305', '#AD11D5', '#2843F5', '#74ED9F',
-    '#1ABC9C', '#E67E22', '#9B59B6', '#4083c5ff', '#D35400', 
+    '#1ABC9C', '#E67E22', '#a81d91ff', '#4083c5ff', '#D35400', 
     '#C0392B', '#16A085', '#8E44AD', '#dd7b5dff', '#F39C12'
   ];
   
@@ -810,6 +965,9 @@ function drawArrows() {
     if (!cardCache.has(course.id)) return;
 
     course.prereqs.forEach((pString) => {
+      // FIX: Skip object-based prerequisites (e.g. { type: 'count_pattern' })
+      if (typeof pString !== 'string') return;
+
       if (pString.match(/^\d+\s+Credits?$/i)) return; // Skip Credit Requirements (No visual arrow)
       
       const prereqId = pString.replace("!", "");
@@ -854,6 +1012,9 @@ function drawArrows() {
     const targetYBase = targetMetrics.cy;
 
     course.prereqs.forEach((pString) => {
+      // FIX: Skip object-based prerequisites here too
+      if (typeof pString !== 'string') return;
+
       const isWeak = pString.endsWith("!");
       const prereqId = pString.replace("!", "");
       if (!cardCache.has(prereqId)) return;
