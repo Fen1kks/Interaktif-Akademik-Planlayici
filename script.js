@@ -28,6 +28,8 @@ const deptDropdown = document.getElementById("dept-dropdown");
 let currentDept = localStorage.getItem("lastDept") || "ME";
 let curriculum = []; // Will be loaded dynamically
 let state = {};      // Will be loaded dynamically
+let realState = null; // Backup for Simulation Mode
+let isSimulationMode = false;
 
 /* =========================================================================
    2. DEPARTMENT & STATE MANAGEMENT
@@ -147,6 +149,7 @@ function loadDepartment(code) {
 }
 
 function saveState() {
+  if (isSimulationMode) return; // Prevent saving in Simulation Mode
   localStorage.setItem(`gpaState_${currentDept}`, JSON.stringify(state));
 }
 
@@ -157,6 +160,11 @@ function updateState(courseId, isCompleted, grade, skipRender = false) {
   
   state[courseId].completed = isCompleted;
   if (grade !== undefined) state[courseId].grade = grade;
+  
+  // Simulation Mode Fix: Manually checked courses are part of simulation
+  if (isSimulationMode) {
+      state[courseId].isSimulation = isCompleted; // True if checked, False (or irrelevant) if unchecked
+  }
   
   if (!isCompleted) {
     cascadeUncheck(courseId);
@@ -213,6 +221,12 @@ if (confirmResetBtn) {
         render();
         location.reload(); 
     });
+}
+
+// 4. Bind Simulation Button
+const simBtn = document.getElementById("sim-mode-btn");
+if (simBtn) {
+    simBtn.addEventListener("click", toggleSimulationMode);
 }
 
 // Close on background click
@@ -452,7 +466,7 @@ function createCard(course) {
   card.id = `card-${course.id}`;
   card.className = `course-card ${locked ? "locked" : ""} ${
     data.completed ? "completed" : ""
-  } ${data.grade === "FF" ? "failed" : ""}`;
+  } ${data.grade === "FF" ? "failed" : ""} ${data.isSimulation ? "simulation-added" : ""}`;
 
   if (course.name === "Summer Practice") {
       card.classList.add("summer-practice");
@@ -1100,7 +1114,7 @@ function drawArrows() {
       
       // Responsive constraints for mobile tightness
       const collisionStartOffset = 10;
-      const collisionEndOffset = 10;
+      const collisionEndOffset = 0; // FIX: Closed gap
       // Threshold must be < (CardWidth + Gap) to detect single-column skips. 
       // Gap is ~30-50px. Card is ~150px. Total ~200px. 
       // So 60px is a safe threshold to distinguish "Adjacent" vs "Skipping".
@@ -1195,7 +1209,7 @@ function drawArrows() {
              `Q ${gutterX2} ${crossY} ${gutterX2} ${crossY + r * (targetY > crossY ? 1 : -1)} ` + 
              `L ${gutterX2} ${targetY - r * (targetY > crossY ? 1 : -1)} ` + 
              `Q ${gutterX2} ${targetY} ${gutterX2 + r} ${targetY} ` + 
-             `L ${targetX} ${targetY}`;
+             `L ${targetX + 5} ${targetY}`;
        } else {
            const actualGap = targetX - sourceX;
            const gutterXBase = sourceX + (actualGap / 2); 
@@ -1493,3 +1507,330 @@ function injectFooter() {
 
 // Initial Call
 injectFooter();
+
+/* =========================================================================
+   8. SIMULATION MODE LOGIC
+   ========================================================================= */
+
+function toggleSimulationMode() {
+    console.log("toggleSimulationMode called. Current isSimulationMode:", isSimulationMode);
+    const btn = document.getElementById("sim-mode-btn");
+    
+    if (isSimulationMode) {
+        // TURN OFF
+        isSimulationMode = false;
+        state = JSON.parse(JSON.stringify(realState)); // Restore
+        realState = null;
+        document.body.classList.remove("simulation-active");
+        
+        // Reset Icon
+        if (btn) btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calculator"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>`;
+        
+        render();
+    } else {
+        // TURN ON
+        realState = JSON.parse(JSON.stringify(state)); // Backup
+        isSimulationMode = true;
+        document.body.classList.add("simulation-active");
+        
+        // Change Icon to "X" (Close)
+        if (btn) btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+
+        runSimulationPrompt();
+        render();
+    }
+}
+
+// Global Modal References
+const simModal = document.getElementById("sim-modal-overlay");
+const simTargetInput = document.getElementById("sim-target-gpa");
+const simCountInput = document.getElementById("sim-course-count");
+const startSimBtn = document.getElementById("start-sim-btn");
+const manualSimBtn = document.getElementById("manual-sim-btn");
+const cancelSimBtn = document.getElementById("cancel-sim-btn");
+const closeSimModalBtn = document.getElementById("close-sim-modal-btn");
+
+function runSimulationPrompt() {
+    if (!simModal) {
+        console.error("Simulation Modal not found!");
+        return;
+    }
+    
+    // Reset Inputs
+    simTargetInput.value = "3.00";
+    simCountInput.value = "6";
+    
+    // Show Modal
+    simModal.style.display = "flex";
+}
+
+// Bind Modal Events
+if (startSimBtn) {
+    startSimBtn.addEventListener("click", () => {
+        const gpa = parseFloat(simTargetInput.value);
+        const count = parseInt(simCountInput.value);
+        
+        if (isNaN(gpa) || isNaN(count) || count <= 0) {
+            alert("Please enter valid numbers.");
+            return;
+        }
+        
+        if (gpa > 4.0 || gpa < 0) {
+            alert("GPA must be between 0 and 4.00");
+            return;
+        }
+
+        simModal.style.display = "none";
+        runSimulation(gpa, count);
+    });
+}
+
+// Manual Mode Listener
+if (manualSimBtn) {
+    manualSimBtn.addEventListener("click", () => {
+        if (simModal) simModal.style.display = "none";
+    });
+}
+
+function cancelSimulation() {
+    if (simModal) simModal.style.display = "none";
+    // If we cancel setup, we should toggle mode back to OFF
+    if (isSimulationMode) {
+        toggleSimulationMode();
+    }
+}
+
+if (cancelSimBtn) cancelSimBtn.addEventListener("click", cancelSimulation);
+if (closeSimModalBtn) closeSimModalBtn.addEventListener("click", cancelSimulation);
+
+
+function runSimulation(targetGPA, courseCount) {
+    console.log("runSimulation called with:", targetGPA, courseCount);
+    // 1. Filter Available Courses (Priority Queue)
+    // Priorities: 
+    // A) FF Grades (Must Retake)
+    // B) Untaken from Past Terms
+    // C) Current Term (Standard)
+    // D) Future Terms
+    
+    const candidates = curriculum.filter(c => {
+        // Exclude Summer Practice from Auto-Sim
+        if (c.name && c.name.toLowerCase().includes("summer practice")) return false;
+
+        // Check if unlocked (Standard Logic)
+        if (isLocked(c.id)) return false;  
+        
+        const s = state[c.id];
+        
+        // Include if NOT completed OR (Completed AND Grade is FF)
+        if (!s || !s.completed) return true;
+        if (s.completed && s.grade === "FF") return true; 
+        
+        // Already passed
+        return false;
+    });
+
+    // Sort Candidates by Priority
+    candidates.sort((a, b) => {
+        const stateA = state[a.id];
+        const stateB = state[b.id];
+        
+        const isFFA = stateA && stateA.completed && stateA.grade === "FF";
+        const isFFB = stateB && stateB.completed && stateB.grade === "FF";
+        
+        // 1. FF Priority
+        if (isFFA && !isFFB) return -1;
+        if (!isFFA && isFFB) return 1;
+        
+        // 2. Term Priority (Lower term first)
+        return a.term - b.term;
+    });
+
+    // Select Top N (Respecting Co-requisites & Strict Limit)
+    const selectedCourses = [];
+    const selectedIds = new Set();
+    
+    for (const course of candidates) {
+        if (selectedCourses.length >= courseCount) break;
+        if (selectedIds.has(course.id)) continue;
+        
+        // 1. Identify Unselected/Unpassed Co-requisites
+        const neededCoreqs = [];
+        if (course.coreqs && course.coreqs.length > 0) {
+            course.coreqs.forEach(coreqId => {
+                // Check if already passed in realState
+                const isPassed = realState[coreqId] && realState[coreqId].completed && realState[coreqId].grade !== "FF";
+                // Check if already selected in this session
+                const isSelected = selectedIds.has(coreqId);
+                
+                if (!isPassed && !isSelected) {
+                    const coreqCourse = curriculum.find(c => c.id === coreqId);
+                    if (coreqCourse) {
+                        neededCoreqs.push(coreqCourse);
+                    }
+                }
+            });
+        }
+        
+        // 2. Check Capacity
+        const requiredSlots = 1 + neededCoreqs.length;
+        const slotsLeft = courseCount - selectedCourses.length;
+        
+        if (requiredSlots <= slotsLeft) {
+            // Fits! Add Main + Coreqs
+            selectedCourses.push(course);
+            selectedIds.add(course.id);
+            
+            neededCoreqs.forEach(cq => {
+                selectedCourses.push(cq);
+                selectedIds.add(cq.id);
+            });
+        }
+        // Else: Skip. logic dictates we cannot take this package without breaking the limit.
+    }
+    
+    if (selectedCourses.length === 0) {
+        alert("No available courses found to simulate!");
+        return;
+    }
+
+    // 2. Mathematical Calculation
+    // Target = (CurrentPoints + NewPoints) / (CurrentCredits + NewCredits)
+    // NewPoints = Target * (CurrentCredits + NewCredits) - CurrentPoints
+    
+    // Calculate Current Metrics (Excluding Sim)
+    let currentPoints = 0;
+    let currentCredits = 0;
+    
+    // Use realState for current metrics calculation
+    Object.keys(realState).forEach(id => {
+        const s = realState[id];
+        const course = getCourse(id);
+        
+        // Match logic with calculateMetrics: Include FF if it affects GPA
+        if (course && s.completed && !isLocked(id, true, true) && s.grade && GRADES[s.grade] !== undefined) {
+             let finalCredits = course.credits;
+             if (course.options && s.selectedOption !== undefined && course.options[s.selectedOption]) {
+                 const opt = course.options[s.selectedOption];
+                 if (opt.credits !== undefined) finalCredits = opt.credits;
+             }
+             
+             const cr = Array.isArray(finalCredits) ? (s.selectedCredit || finalCredits[0]) : finalCredits;
+             
+             currentPoints += cr * GRADES[s.grade];
+             currentCredits += cr;
+        }
+    });
+
+    // Calculate New Credits
+    let newCredits = 0;
+    selectedCourses.forEach(c => {
+        // Assume default credit for variable credits
+        const cr = Array.isArray(c.credits) ? c.credits[0] : c.credits;
+        newCredits += cr;
+    });
+
+    // Solve for NewPoints
+    const totalCredits = currentCredits + newCredits;
+    const requiredTotalPoints = targetGPA * totalCredits;
+    const requiredNewPoints = requiredTotalPoints - currentPoints;
+    
+    // 3. Assign Grades (Distribute for Minimum Margin)
+    let impossible = false;
+
+    // Required Average Grade for New Courses
+    const requiredAvg = newCredits > 0 ? requiredNewPoints / newCredits : 0;
+
+    // Heuristic: Start everything at floor(avg), then bump iteratively
+    const gradeKeys = Object.keys(GRADES).sort((a,b) => GRADES[a] - GRADES[b]); // Ascending: FF, DD, DC...
+    const gradeScores = gradeKeys.map(k => GRADES[k]);
+    
+    // Initial Base assignments
+    let initialGrade = "DD";
+    let initialScore = 1.0;
+    
+    // Find floor grade
+    for (let i = 0; i < gradeKeys.length; i++) {
+        if (gradeScores[i] <= requiredAvg) {
+            initialGrade = gradeKeys[i];
+            initialScore = gradeScores[i];
+        } else {
+            break; 
+        }
+    }
+    
+    // Assign Base
+    selectedCourses.forEach(c => {
+        c._simGrade = initialGrade;
+        c._simScore = initialScore;
+        c._simCredits = Array.isArray(c.credits) ? c.credits[0] : c.credits; // Helper
+    });
+    
+    // Function to calculate current Total New Points
+    const getCurrentNewPoints = () => {
+        return selectedCourses.reduce((acc, c) => acc + (c._simScore * c._simCredits), 0);
+    };
+    
+    // Iterative Bump
+    let safety = 0;
+    while (getCurrentNewPoints() < requiredNewPoints && safety < 100) {
+        safety++;
+        let bestCandidate = null;
+        let minOvershoot = Infinity;
+        let maxEfficiency = -Infinity;
+        
+        let foundCrosser = false;
+        
+        // Try bumping each course
+        for (const c of selectedCourses) {
+            const currentIdx = gradeKeys.indexOf(c._simGrade);
+            if (currentIdx >= gradeKeys.length - 1) continue; // Maxed out (AA)
+            
+            const nextScore = gradeScores[currentIdx + 1];
+            const diff = (nextScore - c._simScore) * c._simCredits;
+            
+            const predictedTotal = getCurrentNewPoints() + diff;
+            const overshoot = predictedTotal - requiredNewPoints;
+            
+            if (overshoot >= 0) {
+                foundCrosser = true;
+                if (overshoot < minOvershoot) {
+                    minOvershoot = overshoot;
+                    bestCandidate = c;
+                }
+            } else {
+                if (!foundCrosser) {
+                     if (!bestCandidate) {
+                         bestCandidate = c;
+                     } else {
+                         if (c._simScore < bestCandidate._simScore) {
+                             bestCandidate = c;
+                         } else if (c._simScore === bestCandidate._simScore) {
+                             if (c._simCredits > bestCandidate._simCredits) bestCandidate = c;
+                         }
+                     }
+                }
+            }
+        }
+        
+        if (bestCandidate) {
+            const idx = gradeKeys.indexOf(bestCandidate._simGrade);
+            bestCandidate._simGrade = gradeKeys[idx + 1];
+            bestCandidate._simScore = gradeScores[idx + 1];
+        } else {
+            break; // No moves left (probably all AA)
+        }
+    }
+
+
+
+    // Apply to State
+    selectedCourses.forEach(c => {
+        updateState(c.id, true, c._simGrade, true); // true = skipRender
+        if (state[c.id]) state[c.id].isSimulation = true; // Mark as sim
+    });
+
+    render();
+
+
+}

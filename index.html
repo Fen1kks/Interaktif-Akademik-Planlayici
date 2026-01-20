@@ -12,8 +12,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="google" content="notranslate" />
-    <meta name="color-scheme" content="light dark">
-    <meta name="darkreader-lock">
+    <meta name="color-scheme" content="light dark" />
+    <meta name="darkreader-lock" />
     <title>Course Prerequisite Tree & GPA Calculator</title>
     <link rel="stylesheet" href="theme.css" />
     <link rel="stylesheet" href="style.css?v=5" />
@@ -23,64 +23,163 @@
     <header class="stats-bar">
       <div class="brand">
         <div class="department-selector" id="dept-selector">
-            <h1 id="dept-title">Department of Mechanical Engineering</h1>
+          <h1 id="dept-title">Department of Mechanical Engineering</h1>
             <svg class="chevron-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            
-            <div class="dropdown-menu" id="dept-dropdown">
-            </div>
+
+          <div class="dropdown-menu" id="dept-dropdown"></div>
         </div>
         <span>Academic Planner & GPA Forecaster</span>
       </div>
 
       <div class="stats-footer">
         <div class="controls-group">
-            <button class="reset-btn" id="reset-btn-mobile" aria-label="Reset All Data" title="Reset All Data">
-                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-            </button>
-            <button class="theme-toggle" id="theme-palette-btn" aria-label="Change Theme" title="Select Theme">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette-icon lucide-palette"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/></svg>
-            </button>
+          <button
+            class="sim-btn"
+            id="sim-mode-btn"
+            aria-label="Simulation Mode"
+            title="Simulation Mode"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-calculator"
+            >
+              <rect width="16" height="20" x="4" y="2" rx="2" />
+              <line x1="8" x2="16" y1="6" y2="6" />
+              <line x1="16" x2="16" y1="14" y2="18" />
+              <path d="M16 10h.01" />
+              <path d="M12 10h.01" />
+              <path d="M8 10h.01" />
+              <path d="M12 14h.01" />
+              <path d="M8 14h.01" />
+              <path d="M12 18h.01" />
+              <path d="M8 18h.01" />
+            </svg>
+          </button>
+          <button
+            class="reset-btn"
+            id="reset-btn-mobile"
+            aria-label="Reset All Data"
+            title="Reset All Data"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+              stroke="currentColor"
+              stroke-width="2"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path
+                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              ></path>
+            </svg>
+          </button>
+          <button
+            class="theme-toggle"
+            id="theme-palette-btn"
+            aria-label="Change Theme"
+            title="Select Theme"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-palette-icon lucide-palette"
+            >
+              <path
+                d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"
+              />
+              <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
+              <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+              <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
+              <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+            </svg>
+          </button>
         </div>
 
         <div class="metrics">
-            <div class="metric-card">
-            <span class="metric-label">Completed Credits</span>
+          <div class="metric-card">
+            <span class="metric-label">Credits</span>
             <span class="metric-value" id="total-credits">0</span>
-            </div>
-            <div class="metric-card">
-            <span class="metric-label">Projected GPA</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">GPA</span>
             <span
-                class="metric-value"
-                id="gpa-score"
-                style="color: var(--c-primary)"
-                >0.00</span
+              class="metric-value"
+              id="gpa-score"
+              style="color: var(--c-primary)"
+              >0.00</span
             >
-            </div>
+          </div>
         </div>
       </div>
     </header>
 
     <div class="grid-wrapper">
-      <main class="curriculum-grid" id="grid-container">
-      </main>
+      <main class="curriculum-grid" id="grid-container"></main>
     </div>
 
     <!-- Reset Confirmation Modal -->
     <div id="reset-modal-overlay" class="theme-modal-overlay">
+      <div class="theme-modal">
+        <div class="theme-modal-header">
+          <h3>Confirm Reset</h3>
+          <button class="close-btn" onclick="closeResetModal()">✕</button>
+        </div>
+        <div style="color: var(--c-text-main); margin-bottom: 1rem">
+          Are you sure you want to reset?
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel" onclick="closeResetModal()">
+            Cancel
+          </button>
+          <button class="modal-btn confirm" id="confirm-reset-btn">
+            Yes, Reset
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Simulation Input Modal -->
+    <div id="sim-modal-overlay" class="theme-modal-overlay">
         <div class="theme-modal">
             <div class="theme-modal-header">
-                <h3>Confirm Reset</h3>
-                <button class="close-btn" onclick="closeResetModal()">✕</button>
+                <h3>Simulation Setup</h3>
+                <button class="close-btn" id="close-sim-modal-btn">✕</button>
             </div>
-            <div style="color: var(--c-text-main); margin-bottom: 1rem;">
-                Are you sure you want to reset?
+            <div style="display: flex; flex-direction: column; gap: 1rem; color: var(--c-text-main);">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Target GPA</label>
+                    <input type="number" id="sim-target-gpa" step="0.01" min="0" max="4.00" placeholder="e.g. 3.00" style="width: 100%; padding: 0.5rem; border: 1px solid var(--c-border); border-radius: 4px; background: var(--c-bg); color: var(--c-text-main);">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Course Count</label>
+                    <input type="number" id="sim-course-count" step="1" min="1" max="20" placeholder="e.g. 5" style="width: 100%; padding: 0.5rem; border: 1px solid var(--c-border); border-radius: 4px; background: var(--c-bg); color: var(--c-text-main);">
+                </div>
             </div>
-            <div class="modal-actions">
-                <button class="modal-btn cancel" onclick="closeResetModal()">Cancel</button>
-                <button class="modal-btn confirm" id="confirm-reset-btn">Yes, Reset</button>
+            <div class="modal-actions" style="justify-content: space-between;">
+                <button class="modal-btn cancel" id="cancel-sim-btn">Cancel</button>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="modal-btn" id="manual-sim-btn" style="border: 1px solid var(--c-primary); color: var(--c-primary); background: transparent;">Manual Mode</button>
+                    <button class="modal-btn confirm" id="start-sim-btn" style="background: #8b5cf6;">Auto-Fill</button>
+                </div>
             </div>
         </div>
     </div>

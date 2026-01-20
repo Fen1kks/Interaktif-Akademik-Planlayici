@@ -5,15 +5,21 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 14px; 
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  font-size: 14px;
 }
 
 body {
   background-color: var(--c-bg);
   color: var(--c-text-main);
   height: 100vh;
-  height: 100dvh; 
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -28,23 +34,23 @@ body {
   background: var(--c-surface);
   padding: 1rem 2rem;
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
 
   justify-content: flex-start;
-  align-items: stretch; 
+  align-items: stretch;
 
   margin-top: 4px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: var(--shadow-sm);
   z-index: 10;
-  flex-shrink: 0; 
+  flex-shrink: 0;
 }
 
 /* Brand & Department Selector */
 .brand {
   display: flex;
   flex-direction: column;
-  margin-bottom: 0; 
+  margin-bottom: 0;
 }
 
 /* New Stats Footer (Controls + Metrics) */
@@ -56,38 +62,45 @@ body {
 }
 
 @media (min-width: 901px) {
-    .stats-bar {
-        flex-direction: row; 
-        align-items: center;
-        justify-content: space-between;
-    }
-    
-    .brand {
-        margin-bottom: 0;
-    }
-    
-    .stats-footer {
-        justify-content: flex-end; /* Align group to right */
-        gap: 0.75rem; 
-        width: auto; 
-        flex-grow: 1; 
-    }
+  .stats-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
 
-    .controls-group {
-        order: 1; /* Now First */
-        margin-right: 0.5rem; 
-    }
-    .metrics {
-        order: 2; /* Now Second */
-    }
+  .brand {
+    margin-bottom: 0;
+  }
+
+  .stats-footer {
+    justify-content: flex-end; /* Align group to right */
+    gap: 0.75rem;
+    width: auto;
+    flex-grow: 1;
+  }
+
+  .controls-group {
+    order: 1; /* Now First */
+    margin-right: 0.5rem;
+  }
+  
+
+  .metrics {
+    order: 2; /* Now Second */
+  }
 }
 
 @media (max-width: 900px) {
-    .stats-footer {
-        justify-content: space-between;
-        align-items: flex-end;
-        margin-top: 0.25rem; 
-    }
+  .stats-footer {
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 0.25rem;
+  }
+  
+  /* Mobile Order: Trash(1), Theme(2), Sim(3) */
+  .controls-group .reset-btn { order: 1; }
+  .controls-group .theme-toggle { order: 2; }
+  .controls-group .sim-btn { order: 3; }
 }
 
 .department-selector {
@@ -181,19 +194,19 @@ body {
 .metrics {
   display: flex;
   gap: 2rem;
-  align-items: center; 
+  align-items: center;
 }
 
 .controls-group {
-    display: flex;
-    gap: 0.25rem;
-    align-items: center;
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
 }
 
 .metric-card {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
 }
 
 .metric-label {
@@ -213,72 +226,86 @@ body {
 }
 
 /* Theme Toggle & Reset Button */
-.theme-toggle, .reset-btn {
+.theme-toggle,
+.reset-btn,
+.sim-btn {
   background: none;
   border: none;
   cursor: pointer;
   color: var(--c-text-main);
   padding: 8px;
   border-radius: 50%;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.theme-toggle:hover, .reset-btn:hover {
+
+/* Desktop Order: Sim(1), Theme(2), Reset(3) */
+@media (min-width: 901px) {
+  .controls-group .sim-btn { order: 1; }
+  .controls-group .theme-toggle { order: 2; }
+  .controls-group .reset-btn { order: 3; }
+}
+.theme-toggle:hover,
+.reset-btn:hover {
   background: rgba(0, 0, 0, 0.05);
 }
-[data-theme="dark"] .theme-toggle:hover, [data-theme="dark"] .reset-btn:hover {
+[data-theme="dark"] .theme-toggle:hover,
+[data-theme="dark"] .reset-btn:hover,
+[data-theme="dark"] .sim-btn:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
 /* Reset Button Specifics */
 .reset-btn:hover {
-    color: #ef4444; 
-    background: rgba(239, 68, 68, 0.1) !important;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1) !important;
 }
 
 /* Dark Mode Adjustment for Reset Button */
 [data-theme="dark"] .reset-btn:hover {
-    color: #fca5a5; /* Softer, Pastel Red */
-    background: rgba(127, 29, 29, 0.4) !important; /* Deep Red Background */
+  color: #fca5a5; /* Softer, Pastel Red */
+  background: rgba(127, 29, 29, 0.4) !important; /* Deep Red Background */
 }
 
 /* Modal Actions (for Reset Confirmation) */
 .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
 }
 
 .modal-btn {
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: background-color 0.2s;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s;
 }
 
 .modal-btn.cancel {
-    background: transparent;
-    color: var(--c-text-muted);
-    border: 1px solid var(--c-surface-border);
+  background: transparent;
+  color: var(--c-text-muted);
+  border: 1px solid var(--c-surface-border);
 }
 
 .modal-btn.cancel:hover {
-    background: var(--c-surface-border);
-    color: var(--c-text-main);
+  background: var(--c-surface-border);
+  color: var(--c-text-main);
 }
 
 .modal-btn.confirm {
-    background: var(--c-danger);
-    color: white;
+  background: var(--c-danger);
+  color: white;
 }
 
 .modal-btn.confirm:hover {
-    filter: brightness(1.1);
+  filter: brightness(1.1);
 }
 
 /* =========================================================================
@@ -287,13 +314,13 @@ body {
 .grid-wrapper {
   flex: 1;
   display: flex;
-  align-items: flex-start; 
+  align-items: flex-start;
   justify-content: flex-start;
-  overflow: auto; 
+  overflow: auto;
   -webkit-overflow-scrolling: touch; /* Valid Mobile Scroll */
   position: relative;
   background: var(--c-bg);
-  padding-top: 0; 
+  padding-top: 0;
   padding-bottom: 0.5rem; /* Very minimal padding to forbid excess scroll */
   width: 100%;
   min-height: 0; /* Critical for nested flex scrolling */
@@ -305,7 +332,7 @@ body {
   gap: 0 4rem;
   padding: 0 1rem 4rem 1rem;
   position: relative; /* Anchor for absolute SVG arrows */
-  transform-origin: top center; 
+  transform-origin: top center;
   transition: transform 0.2s ease-out;
   margin: auto; /* Safe centering: centers if space exists, start-aligns if overflow */
 }
@@ -325,7 +352,7 @@ body {
 .term-column {
   display: flex;
   flex-direction: column;
-  gap: 1rem; 
+  gap: 1rem;
   position: relative;
   min-width: 0;
   padding: 0;
@@ -339,13 +366,13 @@ body {
 
 .term-header {
   padding-bottom: 0.5rem;
-  padding-top: 1rem; 
+  padding-top: 1rem;
   gap: 0.25rem;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
-  border-bottom: 2px solid var(--c-surface-border); 
+  border-bottom: 2px solid var(--c-surface-border);
   transition: border-color 0.2s ease;
 }
 .term-column:hover .term-header {
@@ -367,7 +394,7 @@ body {
   background: var(--c-surface);
   border-radius: var(--radius-md);
   padding: 0.5rem;
-  gap: 0.15rem; 
+  gap: 0.15rem;
   border-radius: 6px;
   z-index: 2;
   position: relative;
@@ -375,7 +402,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border-left: 6px solid var(--grade-color, var(--c-surface-border)); 
+  border-left: 6px solid var(--grade-color, var(--c-surface-border));
   transition: all 0.2s ease;
 }
 
@@ -421,7 +448,7 @@ body {
   font-weight: 700;
   border-color: var(--grade-color, var(--c-primary));
   background: var(--grade-color, var(--c-primary));
-  color: var(--c-text-primary); 
+  color: var(--c-text-primary);
   padding: 1px 4px;
   border-radius: 4px;
   margin-bottom: 0;
@@ -438,7 +465,7 @@ body {
 }
 
 .prereq-hint {
-  display: none; 
+  display: none;
 }
 
 /* State-based text coloring */
@@ -456,11 +483,11 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: var(--c-text-muted); 
-  opacity: 0.15; 
+  color: var(--c-text-muted);
+  opacity: 0.15;
   display: none;
-  pointer-events: none; 
-  z-index: 0; 
+  pointer-events: none;
+  z-index: 0;
 }
 .course-card.locked .locked-icon {
   display: block;
@@ -479,11 +506,11 @@ body {
 .card-controls {
   display: flex;
   align-items: center;
-  justify-content: flex-start; 
+  justify-content: flex-start;
   margin-top: auto;
   border-top: 1px solid rgba(0, 0, 0, 0.04);
-  padding-top: 0.4rem; 
-  gap: 0.75rem; 
+  padding-top: 0.4rem;
+  gap: 0.75rem;
 }
 
 /* Checkbox */
@@ -498,7 +525,7 @@ body {
   display: none;
 }
 .custom-checkbox {
-  width: 18px; 
+  width: 18px;
   height: 18px;
   border-radius: 4px;
   border: 2px solid var(--grade-color, #ddd);
@@ -561,10 +588,10 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%; 
+  width: 100%;
   height: 100%;
-  pointer-events: none; 
-  z-index: 1; 
+  pointer-events: none;
+  z-index: 1;
   overflow: visible;
 }
 
@@ -572,35 +599,36 @@ body {
   fill: none;
   stroke-width: 2px; /* Restored to 2px for Desktop */
   opacity: 0.8;
-  transition: opacity 0.3s, stroke-width 0.3s;
+  transition:
+    opacity 0.3s,
+    stroke-width 0.3s;
 }
 
 .arrow-path.active {
   stroke: var(--c-primary);
-  opacity: 1; 
+  opacity: 1;
   stroke-width: 3px; /* Restored to 3px for Desktop */
 }
 
 .arrow-path.locked {
-  stroke: var(--hue-danger); 
-  stroke-dasharray: 4; 
+  stroke: var(--hue-danger);
+  stroke-dasharray: 4;
 }
 
 /* Tablet & Mobile Spacing Optimizations */
 @media (max-width: 900px) {
-  
   /* Mobile Specific Arrow Thinning */
   .arrow-path {
-      stroke-width: 1px !important;
+    stroke-width: 1px !important;
   }
   .arrow-path.active {
-      stroke-width: 2px !important;
+    stroke-width: 2px !important;
   }
 
   .curriculum-grid {
     gap: 0 2.5rem;
-    margin: 0; 
-    padding-left: 2rem !important; 
+    margin: 0;
+    padding-left: 2rem !important;
     padding-right: 2rem !important;
     padding-bottom: 2rem;
   }
@@ -608,38 +636,38 @@ body {
   .course-card + .course-card {
     margin-top: 1rem;
   }
-  
+
   .term-column {
     gap: 0.75rem;
   }
 
   /* Compact but comfortable */
   .course-card {
-      padding: 0.3rem;
-      min-height: 60px;
-      gap: 0.1rem;
+    padding: 0.3rem;
+    min-height: 60px;
+    gap: 0.1rem;
   }
-  
+
   .course-name {
-      font-size: 0.7rem;
+    font-size: 0.7rem;
   }
-  
+
   .course-id {
-      font-size: 0.7rem;
+    font-size: 0.7rem;
   }
-  
+
   .card-header {
-      margin-bottom: 0;
+    margin-bottom: 0;
   }
 
   .checkbox-wrapper {
-      transform: scale(0.95);
+    transform: scale(0.95);
   }
 
   /* Hide scrollbars on mobile/tablet for cleaner touch experience */
   .grid-wrapper {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
     overflow: auto; /* Allow scrolling */
   }
   .grid-wrapper::-webkit-scrollbar {
@@ -651,28 +679,28 @@ body {
   .stats-bar {
     padding: 0.75rem 1rem 0.5rem 1rem;
   }
-  
+
   .brand {
-      margin-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
   }
 
   .brand h1 {
     font-size: 1.1rem;
     line-height: 1.1;
   }
-  
+
   .brand span {
     font-size: 0.75rem;
   }
 
   .metrics {
-    gap: 1rem; 
+    gap: 1rem;
   }
-  
+
   .metric-value {
     font-size: 1.1rem;
   }
-  
+
   .metric-label {
     font-size: 0.65rem;
   }
@@ -690,7 +718,7 @@ body {
   opacity: 0.7;
   transition: opacity 0.3s;
   pointer-events: none; /* Let clicks pass through if it covers something important */
-  
+
   /* Flex Layout for Alignment */
   display: flex;
   flex-direction: column;
@@ -712,11 +740,11 @@ body {
   .attribution {
     font-size: 0.65rem;
     bottom: 0.25rem;
-    
+
     /* Split Layout: Button Left, Text Right */
     left: 0.5rem;
     right: 0.5rem; /* Span Width */
-    
+
     flex-direction: row-reverse; /* Reverses order: [Button] ... [Text] */
     justify-content: space-between;
     align-items: center;
@@ -731,4 +759,85 @@ body {
 .course-card.summer-practice .course-id {
   background: var(--c-primary) !important;
   color: #000 !important;
+}
+
+/* =========================================================================
+   7. SIMULATION MODE
+   ========================================================================= */
+.sim-btn:hover {
+  color: #8b5cf6; /* Violet-500 */
+  background: rgba(139, 92, 246, 0.1) !important;
+}
+
+body.simulation-active .stats-bar {
+  border-bottom: 2px solid #8b5cf6;
+  position: relative;
+}
+
+body.simulation-active .stats-bar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, transparent, rgba(139, 92, 246, 0.15));
+    pointer-events: none;
+    z-index: -1;
+}
+
+body.simulation-active .course-card.completed:not(.simulation-added) {
+  opacity: 0.5;
+  filter: grayscale(1);
+  transition: all 0.4s ease;
+}
+
+body.simulation-active .course-card.simulation-added {
+  box-shadow: 0 0 0 2px #8b5cf6, 0 0 12px rgba(139, 92, 246, 0.4);
+  background: rgba(139, 92, 246, 0.03); 
+  z-index: 5;
+  transform: translateY(-2px);
+  border-color: #8b5cf6;
+}
+
+/* Simulated "FF" or unlocked courses should use the Grade Color if assigned, 
+   but we want a specific glow. Only override if needed. */
+body.simulation-active .course-card.simulation-added .course-id {
+    background-color: #8b5cf6;
+    color: white;
+}
+
+/* --- THEME SPECIFIC OVERRIDES FOR SIMULATION --- */
+
+/* Light Theme: Darker Violet/Gray for better contrast against white */
+.theme-light body.simulation-active .course-card.simulation-added,
+.theme-rose body.simulation-active .course-card.simulation-added {
+    box-shadow: 0 0 0 2px #4c1d95, 0 0 12px rgba(76, 29, 149, 0.4); /* Violet-900 */
+    border-color: #4c1d95;
+    background: rgba(76, 29, 149, 0.05); /* Slight dark tint */
+}
+
+.theme-light body.simulation-active .course-card.simulation-added .course-id,
+.theme-rose body.simulation-active .course-card.simulation-added .course-id {
+    background-color: #4c1d95; /* Darker Violet */
+    color: white;
+}
+
+.theme-light body.simulation-active .stats-bar, 
+.theme-rose body.simulation-active .stats-bar {
+    border-bottom-color: #4c1d95;
+}
+
+/* Fix for Inactive (Real) courses fading too much into white background */
+.theme-light body.simulation-active .course-card.completed:not(.simulation-added),
+.theme-rose body.simulation-active .course-card.completed:not(.simulation-added) {
+    opacity: 0.85; /* Less transparent */
+    background-color: #cbd5e1 !important; /* Slate-300: Darker Gray */
+    border: 1px solid #94a3b8 !important; /* Slate-400 */
+    filter: grayscale(1);
+    color: #475569;
+    box-shadow: none;
+}
+/* Ensure the ID badge also turns gray/black to indicate inactivity */
+.theme-light body.simulation-active .course-card.completed:not(.simulation-added) .course-id,
+.theme-rose body.simulation-active .course-card.completed:not(.simulation-added) .course-id {
+    background-color: #475569 !important;
+    color: #e2e8f0 !important;
 }
