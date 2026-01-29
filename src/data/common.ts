@@ -12,6 +12,7 @@ export const turkishPool2: CourseOption[] = [
 ].sort((a, b) => a.id.localeCompare(b.id));
 
 // Academic English Pool (REXX1/REXX2)
+// Note: AFE courses are also in freeElectives for overflow handling (3rd AFE -> FEXX1)
 export const englishPool: CourseOption[] = [
     { id: "AFE131", name: "Academic English I", credits: 3 },
     { id: "AFE132", name: "Academic English II", credits: 3 },

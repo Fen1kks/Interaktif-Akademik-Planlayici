@@ -1,6 +1,11 @@
 import { CourseOption } from '../types';
 
 export const freeElectives: CourseOption[] = [
+    
+    { id: "AFE131", name: "Academic English I", credits: 3 },
+    { id: "AFE132", name: "Academic English II", credits: 3 },
+    { id: "AFEA111", name: "English Speaking I", credits: 3 },
+    { id: "AFEA112", name: "English Speaking II", credits: 3 },
     { id: "ACM111", name: "Intro to Comp.", credits: 3 },
     { id: "ACM112", name: "Graphic Design Intro", credits: 3 },
     { id: "ACM211", name: "Data Struct. & DB", credits: 3 },
@@ -725,3 +730,4 @@ export const freeElectives: CourseOption[] = [
     { id: "VCD423", name: "Art Sociology", credits: 3 },
     { id: "VCD474", name: "Game Design", credits: 3 }
 ].sort((a, b) => a.id.localeCompare(b.id));
+

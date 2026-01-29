@@ -159,9 +159,16 @@ function initSystem() {
 
             try {
                 const results = await parseTranscript(file);
-                if (results.length === 0) {
+                
+                // Filter out NC/W grades (withdrawn/no credit courses)
+                const validResults = results.filter(r => {
+                    const grade = r.grade.toUpperCase();
+                    return grade !== 'NC' && grade !== 'W';
+                });
+                
+                if (validResults.length === 0) {
                     showNotification(
-                        currentLang === 'tr' ? "Transkriptten ders okunamadı veya format desteklenmiyor." : "No courses found or unsupported format.",
+                        currentLang === 'tr' ? "Transkriptten geçerli ders okunamadı." : "No valid courses found in transcript.",
                         'error'
                     );
                     return;
@@ -170,7 +177,7 @@ function initSystem() {
                 // Group results by course ID to handle duplicates (FF -> retake scenarios)
                 const courseMap = new Map<string, {course: Course, grade: string, optionIndex?: number}>();
 
-                results.forEach(parsed => {
+                validResults.forEach(parsed => {
                     const cleanId = parsed.id.replace(/\s+/g, ""); 
                     const upperId = cleanId.toUpperCase();
                     
@@ -182,10 +189,42 @@ function initSystem() {
 
                     // 2. If Not Found, Try Matching Options (Electives)
                     if (!targetCourse) {
+                        // Check if this is an AFE course
+                        const isAFECourse = /^AFE(A)?1(31|32|11|12)$/.test(upperId);
+                        
                         // Find all courses where this ID is a valid option
-                        const candidates = curriculum.filter(c => 
+                        let candidates = curriculum.filter(c => 
                             c.options && c.options.some(opt => opt.id.replace(/\s+/g, "").toUpperCase() === upperId)
                         );
+                        
+                        // Special handling for AFE courses: Check if we've already filled REXX1/REXX2
+                        if (isAFECourse) {
+                            const rexxSlots = candidates.filter(c => c.id.startsWith('REXX') && (c.id === 'REXX1' || c.id === 'REXX2'));
+                            const fexxSlots = candidates.filter(c => c.id === 'FEXX1');
+                            
+                            const rexxFilled = rexxSlots.filter(c => courseMap.has(c.id)).length;
+                            
+                            // If 2 REXX slots already filled, prioritize FEXX1
+                            if (rexxFilled >= 2 && fexxSlots.length > 0) {
+                                candidates = fexxSlots;
+                            } else {
+                                candidates = rexxSlots.length > 0 ? rexxSlots : candidates;
+                            }
+                        }
+                        
+                        // Special handling for departmental electives (e.g., ME 432)
+                        // Prioritize REXX6-10 (Alan Seçmeli) slots based on term
+                        const isDeptElective = /^[A-Z]{2,4}\d{3}$/.test(upperId) && 
+                            candidates.some(c => /^REXX(6|7|8|9|10)$/.test(c.id));
+                        
+                        if (isDeptElective) {
+                            const deptElectiveSlots = candidates.filter(c => /^REXX(6|7|8|9|10)$/.test(c.id));
+                            if (deptElectiveSlots.length > 0) {
+                                // Sort by term to fill earlier slots first
+                                deptElectiveSlots.sort((a, b) => a.term - b.term);
+                                candidates = deptElectiveSlots;
+                            }
+                        }
                         
                         // Select the best candidate (first one that hasn't been processed IN THIS BATCH)
                         for (const cand of candidates) {

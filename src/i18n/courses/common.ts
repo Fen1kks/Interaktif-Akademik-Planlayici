@@ -5,11 +5,11 @@ export const commonCourseNames: Record<string, string> = {
   "FEXX3": "Serbest Seçmeli",
   "REXX1": "İng. Seçmeli",
   "REXX2": "İng. Seçmeli", 
-  "REXX6": "Bölüm Seçmeli",
-  "REXX7": "Bölüm Seçmeli",
-  "REXX8": "Bölüm Seçmeli",
-  "REXX9": "Bölüm Seçmeli",
-  "REXX10": "Bölüm Seçmeli",
+  "REXX6": "Alan Seçmeli",
+  "REXX7": "Alan Seçmeli",
+  "REXX8": "Alan Seçmeli",
+  "REXX9": "Alan Seçmeli",
+  "REXX10": "Alan Seçmeli",
   "EXTRA-1": "Ekstra Ders",
   "EXTRA-2": "Ekstra Ders",
   "EXTRA-3": "Ekstra Ders",
@@ -29,5 +29,12 @@ export const commonCourseNames: Record<string, string> = {
   "TKL202": "Türk Dili II",
   "HTR301": "İnkılap Tarihi I",
   "HTR302": "İnkılap Tarihi II",
-  "HUM103": "Uygarlık Tarihi"
+  "HUM103": "Uygarlık Tarihi",
+
+  // Specific Courses
+  "ES222": "Elektrik Temelleri",
+  "EE211": "Devre Teorisi",
+  "ECON294": "Müh. için Ekonomi",
+  "ES301": "Müh. Yönetimi"
+
 };
