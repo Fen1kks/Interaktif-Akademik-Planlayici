@@ -38,7 +38,11 @@ export const popupTranslations: Record<string, { en: string; tr: string }> = {
   themeTitle: { en: "Select Theme", tr: "Tema Seçimi" },
   light: { en: "Light", tr: "Aydınlık" },
   dark: { en: "Dark", tr: "Karanlık" },
-  rose: { en: "Rose", tr: "Gül" }
+  rose: { en: "Rose", tr: "Gül" },
+  
+  // Privacy Modal
+  downloadTranscript: { en: "Download Transcript", tr: "Transkript İndir" },
+  recommended: { en: "Recommended", tr: "Tercih Edilen" }
 };
 
 // 3. Bölüm İsimleri Sözlüğü

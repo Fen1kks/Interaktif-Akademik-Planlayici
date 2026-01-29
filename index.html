@@ -23,7 +23,9 @@
     <link rel="stylesheet" href="/src/assets/styles/style.css" />
   </head>
   <body>
+    <!-- App Header -->
     <header class="stats-bar">
+      <!-- Brand & Dept Selector -->
       <div class="brand">
         <div class="department-selector" id="dept-selector">
           <h1 id="dept-title">Department of Mechanical Engineering</h1>
@@ -32,6 +34,7 @@
         </div>
         <span id="app-title">Academic Planner & GPA Forecaster</span>
       </div>
+      <!-- Control Buttons & Metrics -->
       <div class="stats-footer">
         <div class="controls-group">
           <button
@@ -112,6 +115,20 @@
               <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
             </svg>
           </button>
+          <input type="file" id="transcript-input" accept=".pdf" style="display: none;" />
+          <button 
+            class="import-btn" 
+            id="import-transcript-btn" 
+            aria-label="Import Transcript"
+            title="Import Transcript PDF"
+            style="display: flex; align-items: center; justify-content: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-up">
+              <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+              <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+              <path d="M12 12v6"/>
+              <path d="m15 15-3-3-3 3"/>
+            </svg>
+          </button>
         </div>
         <div class="metrics">
           <div class="metric-card">
@@ -128,6 +145,7 @@
         </div>
       </div>
     </header>
+    <!-- Main Curriculum Grid -->
     <div class="grid-wrapper">
       <main class="curriculum-grid" id="grid-container"></main>
     </div>
@@ -147,6 +165,49 @@
           </button>
           <button class="modal-btn confirm" id="confirm-reset-btn">
             Yes, Reset
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Privacy Warning Modal -->
+    <div id="privacy-modal-overlay" class="theme-modal-overlay">
+      <div class="theme-modal">
+        <div class="theme-modal-header">
+          <h3 id="privacy-title">Gizlilik Uyarısı / Privacy Notice</h3>
+          <button class="close-btn" id="close-privacy-modal-btn">✕</button>
+        </div>
+        <div style="color: var(--c-text-main); margin-bottom: 1rem; font-size: 0.95rem; line-height: 1.5;">
+          <p id="privacy-text-tr" style="margin-bottom: 0.5rem;">
+            Transkriptiniz sadece bu tarayıcıda işlenir ve asla sunucuya yüklenmez (Client-Side Only).
+          </p>
+          <p id="privacy-text-en" style="color: var(--c-text-muted); font-size: 0.85rem;">
+            Your transcript is processed entirely within your browser and is never uploaded to any server.
+          </p>
+          <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--c-border);">
+            <p id="download-transcript-label" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">
+              📥 Transkript İndir / Download Transcript:
+            </p>
+            <ul style="font-size: 0.8rem; line-height: 1.6; padding-left: 1.2rem; margin: 0;">
+              <li>
+                <a href="https://a7.yeditepe.edu.tr/student/documents" target="_blank" style="color: var(--c-primary); text-decoration: none;">
+                  A7 Yeditepe
+                </a>
+                <span id="recommended-tag" style="font-size: 0.75rem; color: var(--c-text-muted); margin-left: 4px;">(Tercih Edilen)</span>
+              </li>
+              <li>
+                <a href="https://www.turkiye.gov.tr/yuksekogretim-kurulu-transkript-belgesi-sorgulama" target="_blank" style="color: var(--c-primary); text-decoration: none;">
+                  e-Devlet (YÖK)
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel" id="cancel-privacy-btn">
+            İptal / Cancel
+          </button>
+          <button class="modal-btn confirm" id="confirm-privacy-btn" style="background: var(--c-primary);">
+            Dosya Seç / Select File
           </button>
         </div>
       </div>
@@ -224,6 +285,9 @@
             </div>
         </a>
     </div>
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+    
     <!-- Scripts -->
     <script type="module" src="/src/main.ts"></script>
   </body>

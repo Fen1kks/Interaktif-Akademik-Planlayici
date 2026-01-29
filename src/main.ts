@@ -1,9 +1,10 @@
 import { departments } from './data/registry';
-import { ThemeManager } from './theme';
-import { scheduleDrawArrows } from './visuals';
-import { isLocked, calculateMetrics, GRADES, getSimulationCandidates, calculateSimulationGrades } from './logic';
+import { ThemeManager } from './utils/theme';
+import { scheduleDrawArrows, showNotification } from './utils/visuals';
+import { isLocked, calculateMetrics, GRADES, getSimulationCandidates, calculateSimulationGrades } from './utils/logic';
 import { Course } from './types';
 import { currentLang, t, getCourseName, getDepartmentName, setupLanguageButton, updateGlobalTranslations } from './i18n';
+import { parseTranscript } from './utils/transcript-parser';
 
 // DOM Elements
 const grid = document.getElementById("grid-container") as HTMLDivElement;
@@ -23,6 +24,10 @@ const startSimBtn = document.getElementById("start-sim-btn") as HTMLButtonElemen
 const manualSimBtn = document.getElementById("manual-sim-btn") as HTMLButtonElement;
 const cancelSimBtn = document.getElementById("cancel-sim-btn") as HTMLButtonElement;
 const closeSimModalBtn = document.getElementById("close-sim-modal-btn") as HTMLButtonElement;
+
+// Transcript Import
+const transcriptInput = document.getElementById("transcript-input") as HTMLInputElement;
+const importBtn = document.getElementById("import-transcript-btn") as HTMLButtonElement;
 
 // STATE
 let currentDept = localStorage.getItem("lastDept") || "ME";
@@ -101,6 +106,146 @@ function initSystem() {
         });
     }
     updateGlobalTranslations(currentDept, departments[currentDept]?.name || ""); // Initial text update
+
+    // Transcript Import Logic
+    const privacyModal = document.getElementById("privacy-modal-overlay") as HTMLDivElement;
+    const closePrivacyBtn = document.getElementById("close-privacy-modal-btn") as HTMLButtonElement;
+    const cancelPrivacyBtn = document.getElementById("cancel-privacy-btn") as HTMLButtonElement;
+    const confirmPrivacyBtn = document.getElementById("confirm-privacy-btn") as HTMLButtonElement;
+    
+    // Privacy Modal Text Elements
+    const privacyTitle = document.getElementById("privacy-title") as HTMLHeadingElement;
+    const privacyTextTr = document.getElementById("privacy-text-tr") as HTMLParagraphElement;
+    const privacyTextEn = document.getElementById("privacy-text-en") as HTMLParagraphElement;
+
+    if (importBtn && transcriptInput && privacyModal) {
+        // Open Modal
+        importBtn.addEventListener("click", () => {
+             // Dynamic Language Update
+             if (currentLang === 'tr') {
+                 if (privacyTitle) privacyTitle.textContent = "Gizlilik Uyarısı";
+                 if (privacyTextTr) privacyTextTr.style.display = "block";
+                 if (privacyTextEn) privacyTextEn.style.display = "none";
+                 if (cancelPrivacyBtn) cancelPrivacyBtn.textContent = "İptal";
+                 if (confirmPrivacyBtn) confirmPrivacyBtn.textContent = "Dosya Seç";
+             } else {
+                 if (privacyTitle) privacyTitle.textContent = "Privacy Notice";
+                 if (privacyTextTr) privacyTextTr.style.display = "none";
+                 if (privacyTextEn) privacyTextEn.style.display = "block";
+                 if (cancelPrivacyBtn) cancelPrivacyBtn.textContent = "Cancel";
+                 if (confirmPrivacyBtn) confirmPrivacyBtn.textContent = "Select File";
+             }
+             
+             privacyModal.style.display = "flex";
+        });
+
+        // Close Modal Handlers
+        const closePrivacy = () => { privacyModal.style.display = "none"; };
+        closePrivacyBtn?.addEventListener("click", closePrivacy);
+        cancelPrivacyBtn?.addEventListener("click", closePrivacy);
+        
+        // Confirm & Trigger File Input
+        confirmPrivacyBtn?.addEventListener("click", () => {
+            closePrivacy();
+            // Small timeout to ensure modal closes visually before file picker (optional but smooth)
+            setTimeout(() => {
+                 transcriptInput.click();
+            }, 100);
+        });
+
+        transcriptInput.addEventListener("change", async (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (!file) return;
+
+            try {
+                const results = await parseTranscript(file);
+                if (results.length === 0) {
+                    showNotification(
+                        currentLang === 'tr' ? "Transkriptten ders okunamadı veya format desteklenmiyor." : "No courses found or unsupported format.",
+                        'error'
+                    );
+                    return;
+                }
+
+                let updatedCount = 0;
+                const assignedIds = new Set<string>();
+
+                results.forEach(parsed => {
+                    const cleanId = parsed.id.replace(/\s+/g, ""); 
+                    const upperId = cleanId.toUpperCase();
+                    
+                    let targetCourse: Course | undefined;
+                    let selectedOptionIndex: number | undefined = undefined;
+
+                    // 1. Try Direct Match
+                    targetCourse = curriculum.find(c => c.id.replace(/\s+/g, "").toUpperCase() === upperId);
+
+                    // 2. If Not Found, Try Matching Options (Electives)
+                    if (!targetCourse) {
+                        // Find all courses where this ID is a valid option
+                        const candidates = curriculum.filter(c => 
+                            c.options && c.options.some(opt => opt.id.replace(/\s+/g, "").toUpperCase() === upperId)
+                        );
+                        
+                        // Select the best candidate (first one that hasn't been assigned IN THIS BATCH)
+                        // We also prioritize slots that are empty in the current state to avoid overwriting if possible,
+                        // but if all empty slots are taken, we overwrite.
+                        for (const cand of candidates) {
+                             if (!assignedIds.has(cand.id)) {
+                                  // Found a slot!
+                                  targetCourse = cand;
+                                  selectedOptionIndex = cand.options!.findIndex(opt => opt.id.replace(/\s+/g, "").toUpperCase() === upperId);
+                                  break;
+                             }
+                        }
+                    } else if (targetCourse.options) {
+                        // Direct match but has options (unlikely but possible if ID matches option ID or course ID matches option ID?)
+                        // Safe to proceed as direct match usually.
+                        // But if it's a generic holder like "REXX1" it wouldn't match "AFEA111" directly.
+                    }
+                    
+                    if (targetCourse) {
+                        // Avoid double updating same course in same batch
+                        if (!assignedIds.has(targetCourse.id)) {
+                             updateState(targetCourse.id, true, parsed.grade, true, selectedOptionIndex); 
+                             assignedIds.add(targetCourse.id);
+                             updatedCount++;
+                        }
+                    }
+                });
+
+                if (updatedCount > 0) {
+                     saveState();
+                     render();
+                     setTimeout(() => {
+                        calculateOptimalZoom();
+                        requestAnimationFrame(() => draw());
+                     }, 150);
+                     showNotification(
+                        currentLang === 'tr' 
+                        ? `${updatedCount} ders başarıyla güncellendi!`
+                        : `${updatedCount} courses successfully updated!`,
+                        'success'
+                     );
+                } else {
+                     showNotification(
+                        currentLang === 'tr' ? "Transkript okundu ancak eşleşen ders bulunamadı." : "Transcript parsed but no matching courses found.",
+                        'info'
+                     );
+                }
+                
+                // Clear input
+                transcriptInput.value = "";
+
+            } catch (error) {
+                console.error(error);
+                showNotification(
+                    currentLang === 'tr' ? "Transkript işlenirken bir hata oluştu." : "An error occurred while processing the transcript.",
+                    'error'
+                );
+            }
+        });
+    }
 }
 
 
@@ -150,11 +295,12 @@ function loadDepartment(code: string) {
     }, 150);
 }
 
-function updateState(courseId: string, isCompleted: boolean, grade?: string, skipRender = false) {
+function updateState(courseId: string, isCompleted: boolean, grade?: string, skipRender = false, selectedOptionIndex?: number) {
     if (!state[courseId]) state[courseId] = { completed: false, grade: "" };
     
     state[courseId].completed = isCompleted;
     if (grade !== undefined) state[courseId].grade = grade;
+    if (selectedOptionIndex !== undefined) state[courseId].selectedOption = selectedOptionIndex;
     
     if (isSimulationMode) {
         state[courseId].isSimulation = isCompleted;

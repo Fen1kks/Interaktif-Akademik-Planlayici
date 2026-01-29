@@ -1,4 +1,4 @@
-import { ThemeManager as IThemeManager } from './types';
+import { ThemeManager as IThemeManager } from '../types';
 
 class ThemeManagerImpl implements IThemeManager {
     private themeBtn: HTMLElement | null = null;

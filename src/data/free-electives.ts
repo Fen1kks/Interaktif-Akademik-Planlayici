@@ -122,6 +122,7 @@ export const freeElectives: CourseOption[] = [
     { id: "COMM433", name: "Pol Campaigns", credits: 3 },
     { id: "COMM442", name: "Media Mgmt", credits: 3 },
     { id: "COMM461", name: "Pop Culture", credits: 3 },
+    { id: "CET110", name: "B. Comp. Apps.", credits: 3 },
     { id: "CPLT285", name: "Euro Lit Topics", credits: 3 },
     { id: "CPLT287", name: "Modern Drama I", credits: 3 },
     { id: "CPLT288", name: "Modern Drama II", credits: 3 },

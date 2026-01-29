@@ -113,6 +113,9 @@ export const freeElectiveNames: Record<string, string> = {
   "ARCH471": "Türk Mimarisi",
   "ARCH472": "Taş Koruma",
 
+  // CET
+  "CET110": "Temel Bil. Uyg.",
+
   // COMM
   "COMM101": "İletişime Giriş",
   "COMM102": "Medya Tarihi",

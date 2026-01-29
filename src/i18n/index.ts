@@ -154,4 +154,8 @@ export function updateGlobalTranslations(currentDeptCode: string, originalDeptNa
             span.textContent = tPopup(val as keyof typeof popupTranslations);
         }
     });
+
+    // Privacy Modal Download Section
+    setText("#download-transcript-label", `📥 ${tPopup("downloadTranscript")}:`);
+    setText("#recommended-tag", `(${tPopup("recommended")})`);
 }

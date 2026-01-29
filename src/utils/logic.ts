@@ -1,4 +1,4 @@
-import { Course, CourseId } from './types';
+import { Course, CourseId } from '../types';
 
 export const GRADES: Record<string, number> = {
   AA: 4.0, 

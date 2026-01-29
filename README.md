@@ -45,12 +45,19 @@ Ders seçim dönemlerinde hangi dersin hangisine bağlı olduğunu (prerequisite
 - **🔒 Kilit Sistemi (Logic Lock):** Henüz ön koşulunu vermediğiniz bir dersi seçmenizi engelleyerek hatalı program yapma riskini ortadan kaldırır.
 - **💾 LocalStorage Teknolojisi:** Üyelik gerektirmez! Tüm verileriniz sadece kendi tarayıcınızda saklanır ve sayfayı yenilediğinizde kaybolmaz.
 - **🎨 Gelişmiş Tema Sistemi:** Göz yormayan "Karanlık Mod", ferah "Aydınlık Mod" ve özel "Rose" teması seçenekleriyle kişiselleştirilebilir deneyim.
+- **🌍 Çoklu Dil Desteği:** Türkçe ve İngilizce dilleri arasında anında geçiş yapabilme imkanı. Tüm ders adları, arayüz metinleri ve uyarılar seçilen dile göre dinamik olarak güncellenir.
 
 ### 🎓 Ön Koşul Sistemi
 
 - **⚡ Eş Koşul (Co-requisite) Desteği:** Laboratuvar ve teorik dersler gibi birlikte alınması gereken dersleri otomatik olarak tanır ve uyarır.
 - **⚠️ Zayıf Ön Koşul (Weak Prerequisite):** Dersi geçmiş olmanız gerekmez; sadece almış olmanız (FF olsa bile) yeterlidir.
 - **🔢 Sayısal Ön Koşul (Count Pattern):** "En az 5 adet ME3XX dersi" gibi esnek ön koşul kurallarını destekler.
+
+### 📄 PDF Transkript Yükleme (YENİ!)
+
+- **📂 Tek Tıkla İçe Aktarma:** Okul portalından (OBS) veya e-Devlet'ten indirdiğiniz PDF transkriptinizi sisteme yükleyerek tüm derslerinizi saniyeler içinde işleyin.
+- **🔒 Gizlilik Odaklı:** Transkriptiniz **asla** bir sunucuya yüklenmez. Tüm işlem tarayıcınızda (Client-Side) gerçekleşir.
+- **✨ Akıllı Eşleştirme:** Sistem, ders kodlarını ve notlarını otomatik olarak tanır, seçmeli dersleri ilgili havuzlardan bulup doğru slotlara yerleştirir.
 
 ### 📚 Seçmeli Ders Sistemi
 
@@ -59,6 +66,7 @@ Ders seçim dönemlerinde hangi dersin hangisine bağlı olduğunu (prerequisite
 - **💡 Dinamik Kredi Sistemi:** Dersin kredisini (0, 2, 3, 4 vb.) kullanıcı seçebilir.
 - **🎯 Akıllı Filtreleme:** Her bölüm kendi özel seçmeli havuzlarını kullanır, tekrar eden dersler otomatik filtrelenir.
 - **📱 PWA Desteği:** iOS ve Android cihazlarda uygulamayı ana ekrana ekleyerek tam ekran deneyimi yaşayabilirsiniz.
+- **🔔 Gelişmiş Bildirimler:** Tarayıcı uyarıları yerine modern, engelleyici olmayan "Toast" bildirimleri.
 
 ### 🏛️ Desteklenen Bölümler
 
@@ -86,8 +94,11 @@ Proje, **`src/data/`** altında modüler bir yapı kullanır:
 - **`src/data/departments/*.ts`** - Her bölümün özel müfredatı (ME, CSE vb.) **burada bulunur**.
 - **`src/data/common.ts`** - Ortak havuzlar (İngilizce, Programlama, Teknik Seçmeliler)
 - **`src/data/registry.ts`** - Bölüm kayıt sistemi
-- **`src/logic.ts`** - Hesaplama ve kilit mantığı (Saf fonksiyonlar)
-- **`src/visuals.ts`** - Görselleştirme motoru
+- **`src/i18n/*.ts`** - Dil ve çeviri dosyaları (Ders isimleri, arayüz metinleri)
+- **`src/utils/logic.ts`** - Hesaplama ve kilit mantığı (Saf fonksiyonlar)
+- **`src/utils/visuals.ts`** - Görselleştirme motoru
+- **`src/utils/theme.ts`** - Tema yöneticisi
+- **`src/utils/transcript-parser.ts`** - PDF İşleme motoru
 
 ## 🗺️ Gelecek Planları (Roadmap)
 
