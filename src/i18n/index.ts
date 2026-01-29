@@ -98,6 +98,10 @@ export function updateGlobalTranslations(currentDeptCode: string, originalDeptNa
         }
     }
 
+    // App Title
+    const appTitle = document.getElementById("app-title");
+    if (appTitle) appTitle.textContent = t("appTitle");
+
     // Tooltips
     const resetBtn = document.getElementById("reset-btn-mobile");
     if(resetBtn) resetBtn.title = t("reset");

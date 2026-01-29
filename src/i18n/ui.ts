@@ -15,7 +15,8 @@ export const uiTranslations: Record<string, { en: string; tr: string }> = {
   extra: { en: "Extra / Transfer", tr: "Ekstra / Transfer" },
   prereqs: { en: "Prereqs", tr: "Önkoşul" },
   coreqs: { en: "Coreqs", tr: "Eşkoşul" },
-  search: { en: "Search...", tr: "Ara..." }
+  search: { en: "Search...", tr: "Ara..." },
+  appTitle: { en: "Academic Planner & GPA Forecaster", tr: "Akademik Planlayıcı & Ortalama Hesaplayıcı" }
 };
 
 // 2. Popup / Modal Metinleri
