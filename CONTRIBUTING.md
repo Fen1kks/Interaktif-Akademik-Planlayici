@@ -186,6 +186,7 @@ options: programmingPool
 options: commonTechnicalElectives
 
 // Serbest Seçmeliler
+// Serbest Seçmeliler
 options: freeElectives
 ```
 
@@ -201,6 +202,40 @@ const ieTechnicalElectives: CourseOption[] = [
   // Ortak havuzdan miras al (filtersiz)
   ...commonTechnicalElectives
 ].sort((a, b) => a.id.localeCompare(b.id)); // Alfabetik sıralama şart
+```
+
+---
+
+## 🌍 Çoklu Dil Desteği (i18n)
+
+Proje Türkçe ve İngilizce dil desteği sunmaktadır. Yeni bir bölüm eklerken ilgili çevirileri de eklemeniz gerekir.
+
+### 1. Bölüm İsimleri (`src/i18n/ui.ts`)
+
+Bölüm kodunun ve tam adının Türkçe karşılığını `src/i18n/ui.ts` dosyasındaki `departmentNames` objesine ekleyin:
+
+```typescript
+export const departmentNames: Record<string, string> = {
+  "ME": "Makine Mühendisliği",
+  // ... diğer bölümler
+};
+```
+
+### 2. Ders Çevirileri (`src/i18n/courses/departments.ts`)
+
+Bölümünüze özel derslerin Türkçe karşılıklarını `src/i18n/courses/departments.ts` dosyasına ekleyin. Eğer İngilizce isim ile Türkçe isim aynıysa (örn: Calculus) eklemenize gerek yoktur.
+
+Ayrıca bölümünüze özel seçmeli havuz isimleri (REXX) varsa, onları da buraya eklemelisiniz.
+
+```typescript
+export const deptCourseNames: Record<string, string> = {
+  "ME101": "Makine Müh. Giriş",
+  "ME352": "Sistem Dinamiği",
+  
+  // Bölüme özel havuzlar
+  "REXX3": "Prog. Seçmeli",
+  "REXX4": "Elektronik Seçmeli"
+};
 ```
 
 ---

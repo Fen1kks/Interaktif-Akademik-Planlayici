@@ -3,14 +3,16 @@ import { ThemeManager } from './theme';
 import { scheduleDrawArrows } from './visuals';
 import { isLocked, calculateMetrics, GRADES, getSimulationCandidates, calculateSimulationGrades } from './logic';
 import { Course } from './types';
+import { currentLang, t, getCourseName, getDepartmentName, setupLanguageButton, updateGlobalTranslations } from './i18n';
 
 // DOM Elements
 const grid = document.getElementById("grid-container") as HTMLDivElement;
 const creditsEl = document.getElementById("total-credits") as HTMLSpanElement;
 const gpaEl = document.getElementById("gpa-score") as HTMLSpanElement;
-const deptTitle = document.getElementById("dept-title") as HTMLHeadingElement;
+
 const deptSelector = document.getElementById("dept-selector") as HTMLDivElement;
 const deptDropdown = document.getElementById("dept-dropdown") as HTMLDivElement;
+const langBtn = document.getElementById("lang-toggle-btn") as HTMLButtonElement;
 
 // Simulation UI
 const simBtn = document.getElementById("sim-mode-btn") as HTMLButtonElement;
@@ -48,7 +50,7 @@ function initSystem() {
     if (deptDropdown) {
         deptDropdown.innerHTML = codes.map(code => 
             `<div class="dropdown-item ${code === currentDept ? 'selected' : ''}" data-code="${code}">
-                ${departments[code].name} (${code})
+                ${getDepartmentName(code, departments[code].name)} (${code})
             </div>`
         ).join("");
         
@@ -73,7 +75,35 @@ function initSystem() {
             deptSelector.classList.remove("active");
         }
     });
+
+    // Language Button Listener
+    if (langBtn) {
+        setupLanguageButton(langBtn, () => {
+             // Re-populate Dropdown to update names
+            if (deptDropdown) {
+                const codes = Object.keys(departments).sort((a, b) => a.localeCompare(b));
+                deptDropdown.innerHTML = codes.map(code => 
+                    `<div class="dropdown-item ${code === currentDept ? 'selected' : ''}" data-code="${code}">
+                        ${getDepartmentName(code, departments[code].name)} (${code})
+                    </div>`
+                ).join("");
+                
+                 deptDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        const code = (e.currentTarget as HTMLElement).dataset.code;
+                        if (code) switchDepartment(code);
+                    });
+                });
+            }
+
+            updateGlobalTranslations(currentDept, departments[currentDept]?.name || "");
+            loadDepartment(currentDept); 
+        });
+    }
+    updateGlobalTranslations(currentDept, departments[currentDept]?.name || ""); // Initial text update
 }
+
+
 
 function switchDepartment(code: string) {
     if (!departments[code]) return;
@@ -97,7 +127,7 @@ function loadDepartment(code: string) {
     }
 
     const deptData = departments[code];
-    deptTitle.textContent = `Department of ${deptData.name}`;
+    updateGlobalTranslations(currentDept, deptData.name);
     curriculum = deptData.curriculum;
 
     if (typeof (window as any).gtag === 'function') {
@@ -186,10 +216,21 @@ function render() {
         col.className = "term-column";
         
         const yearNum = Math.ceil(term / 2);
+        // Suffix logic only for English
         const suffix = (n: number) => n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th";
-        const headerText = term === 9 
-            ? "Ekstra / Transfer" 
-            : `${yearNum}${suffix(yearNum)} Year - ${term % 2 !== 0 ? "Fall" : "Spring"}`;
+        
+        let headerText = "";
+        
+        if (term === 9) {
+            headerText = t("extra");
+        } else {
+            const season = term % 2 !== 0 ? t("fall") : t("spring");
+            const yearLabel = currentLang === 'tr' 
+                ? `${yearNum}. Sınıf` 
+                : `${yearNum}${suffix(yearNum)} Year`;
+                
+            headerText = `${yearLabel} - ${season}`;
+        }
             
         col.innerHTML = `<div class="term-header"><div class="term-name" style="font-weight: 700; font-size: 0.9rem; color: var(--c-primary);">${headerText}</div></div>`;
         
@@ -250,6 +291,10 @@ function createCard(course: Course) {
     let currentCredit = course.credits;
     let isVariable = Array.isArray(course.credits);
     
+    let displayId = course.id;
+    let displayName = getCourseName(course.id, course.name);
+    let selectedOptionIdx = -1;
+
     if (course.options && data.selectedOption !== undefined && course.options[data.selectedOption]) {
         const opt = course.options[data.selectedOption];
         if (opt.credits !== undefined) {
@@ -258,6 +303,10 @@ function createCard(course: Course) {
                 isVariable = false;
             }
         }
+        // Option Name Translation
+        selectedOptionIdx = data.selectedOption;
+        displayId = course.options[selectedOptionIdx].id;
+        displayName = getCourseName(displayId, course.options[selectedOptionIdx].name);
     }
     const displayCredit = Array.isArray(currentCredit) 
         ? currentCredit[data.selectedCreditIndex ?? 0] 
@@ -276,7 +325,7 @@ function createCard(course: Course) {
         showCreditLine = true;
         crText = isSummerPractice 
             ? `${displayCredit} CR`
-            : `${displayCredit} Credit`;
+            : `${displayCredit} ${t("credits")}`;
     }
     if (showCreditLine) {
         creditDisplayParts.push(`<span style="font-size: 0.75rem;">${crText}</span>`);
@@ -340,18 +389,6 @@ function createCard(course: Course) {
     const finalGradeColor = data.grade === "FF" ? "#dc2626" : data.completed ? getGradeColor(data.grade) : "#cbd5e1";
     card.style.setProperty("--grade-color", finalGradeColor);
 
-    // Options Logic (Display ID)
-    let displayId = course.id;
-    let displayName = course.name;
-    let selectedOptionIdx = -1;
-    if (course.options) {
-        if (data.selectedOption !== undefined && course.options[data.selectedOption]) {
-            selectedOptionIdx = data.selectedOption;
-            displayId = course.options[selectedOptionIdx].id;
-            displayName = course.options[selectedOptionIdx].name;
-        }
-    }
-
     // 1. Locked Icon
     const lockedIcon = document.createElement("div");
     lockedIcon.className = "locked-icon";
@@ -398,7 +435,7 @@ function createCard(course: Course) {
         course.options.forEach((opt, idx) => {
             const option = document.createElement("option");
             option.value = String(idx);
-            option.textContent = `${opt.id} - ${opt.name}`;
+            option.textContent = `${opt.id} - ${getCourseName(opt.id, opt.name)}`;
             if (selectedOptionIdx === idx) option.selected = true;
             optionsSelect.appendChild(option);
         });

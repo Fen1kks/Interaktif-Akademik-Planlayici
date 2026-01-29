@@ -97,10 +97,11 @@ body {
     margin-top: 0.25rem;
   }
   
-  /* Mobile Order: Trash(1), Theme(2), Sim(3) */
+  /* Mobile Order: Trash(1), Theme(2), Sim(3), Lang(4) */
   .controls-group .reset-btn { order: 1; }
-  .controls-group .theme-toggle { order: 2; }
-  .controls-group .sim-btn { order: 3; }
+  .controls-group .lang-btn { order: 2; }
+  .controls-group .theme-toggle { order: 3; }
+  .controls-group .sim-btn { order: 4; }
 }
 
 .department-selector {
@@ -227,6 +228,7 @@ body {
 
 /* Theme Toggle & Reset Button */
 .theme-toggle,
+.lang-btn,
 .reset-btn,
 .sim-btn {
   background: none;
@@ -247,9 +249,11 @@ body {
 @media (min-width: 901px) {
   .controls-group .sim-btn { order: 1; }
   .controls-group .theme-toggle { order: 2; }
-  .controls-group .reset-btn { order: 3; }
+  .controls-group .lang-btn { order: 3; }
+  .controls-group .reset-btn { order: 4; }
 }
 .theme-toggle:hover,
+.lang-btn:hover,
 .reset-btn:hover {
   background: rgba(0, 0, 0, 0.05);
 }
@@ -785,6 +789,16 @@ body {
 .sim-btn:hover {
   color: #8b5cf6; /* Violet-500 */
   background: rgba(139, 92, 246, 0.1) !important;
+}
+
+/* Lang Button */
+.lang-btn {
+  width: 36px;
+  height: 36px;
+}
+.lang-btn:hover {
+    color: var(--c-primary);
+    background: rgba(37, 99, 235, 0.15) !important; /* Slightly more visible blue */
 }
 
 body.simulation-active .stats-bar {
