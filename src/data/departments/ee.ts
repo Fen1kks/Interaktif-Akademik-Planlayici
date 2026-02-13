@@ -1,7 +1,5 @@
 import { Department, CourseOption } from '../../types';
-import { 
-    turkishPool1, englishPool, commonTechnicalElectives 
-} from '../common';
+import { turkishPool1, englishPool, commonTechnicalElectives } from '../common';
 import { freeElectives } from '../free-electives';
 
 // REXX3, 4, 5, 7, 8: Department Electives (Core EE)

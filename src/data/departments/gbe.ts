@@ -1,7 +1,5 @@
 import { Department, CourseOption } from '../../types';
-import { 
-    turkishPool1, englishPool, programmingPool, commonTechnicalElectives 
-} from '../common';
+import { turkishPool1, englishPool, programmingPool, commonTechnicalElectives } from '../common';
 import { freeElectives } from '../free-electives';
 
 // REXX3: GBE Intro

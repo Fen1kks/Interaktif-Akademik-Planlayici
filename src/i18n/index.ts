@@ -15,9 +15,7 @@ export const courseNameMap: Record<string, string> = {
 const storedLang = localStorage.getItem("appLang") as "en" | "tr" | null;
 // 2. Otherwise check browser language
 const browserLang = navigator.language.toLowerCase().startsWith("tr") ? "tr" : "en";
-
 export let currentLang: "en" | "tr" = storedLang || browserLang;
-
 export function setLanguage(lang: "en" | "tr") {
   currentLang = lang;
   localStorage.setItem("appLang", lang);
@@ -41,7 +39,6 @@ export function getDepartmentName(deptCode: string, originalName: string): strin
   return departmentNames[deptCode] || originalName;
 }
 
-
 // --- UI HELPERS ---
 
 const globeIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>`;
@@ -53,7 +50,6 @@ function updateLangButtonVisuals(btn: HTMLElement, showText = false) {
     } else {
         btn.innerHTML = globeIcon;
     }
-    
     btn.title = currentLang === "en" ? "Switch Language (EN)" : "Dil Değiştir (TR)";
     btn.ariaLabel = currentLang === "en" ? "Switch to Turkish" : "Switch to English";
 }
@@ -63,24 +59,19 @@ export function setupLanguageButton(btn: HTMLElement, onLanguageChanged: () => v
     btn.addEventListener("click", () => {
         const newLang = currentLang === "en" ? "tr" : "en";
         setLanguage(newLang);
-        
-        // Temporary Text Feedback
         updateLangButtonVisuals(btn, true);
         clearTimeout(langTimeout);
         langTimeout = window.setTimeout(() => {
             updateLangButtonVisuals(btn, false);
         }, 3000);
-
         onLanguageChanged();
     });
 }
 
 let activeDept = "";
 
-
 export function updateGlobalTranslations(currentDeptCode: string, originalDeptName: string) {
     activeDept = currentDeptCode;
-    // Update Metric Labels
     document.querySelectorAll(".metric-card .metric-label").forEach(el => {
         const parent = el.parentElement;
         if(parent?.querySelector("#total-credits")) el.textContent = t("credits");

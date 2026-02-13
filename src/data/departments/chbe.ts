@@ -1,7 +1,5 @@
 import { Department, CourseOption } from '../../types';
-import { 
-    turkishPool1, englishPool, commonTechnicalElectives 
-} from '../common';
+import { turkishPool1, englishPool, commonTechnicalElectives } from '../common';
 import { freeElectives } from '../free-electives';
 
 // REXX2: Intro to Computing

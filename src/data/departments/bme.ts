@@ -1,7 +1,5 @@
 import { Department, CourseOption } from '../../types';
-import { 
-    turkishPool1, turkishPool2, englishPool, programmingPool, commonTechnicalElectives 
-} from '../common';
+import { turkishPool1, turkishPool2, englishPool, programmingPool, commonTechnicalElectives } from '../common';
 import { freeElectives } from '../free-electives';
 
 const bmeRexxPool4: CourseOption[] = [

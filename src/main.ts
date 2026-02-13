@@ -10,7 +10,6 @@ import { parseTranscript } from './utils/transcript-parser';
 const grid = document.getElementById("grid-container") as HTMLDivElement;
 const creditsEl = document.getElementById("total-credits") as HTMLSpanElement;
 const gpaEl = document.getElementById("gpa-score") as HTMLSpanElement;
-
 const deptSelector = document.getElementById("dept-selector") as HTMLDivElement;
 const deptDropdown = document.getElementById("dept-dropdown") as HTMLDivElement;
 const langBtn = document.getElementById("lang-toggle-btn") as HTMLButtonElement;
@@ -41,7 +40,6 @@ let pendingCreditOpen: string | null = null; // Track course needing credit drop
 // Initialization
 function initSystem() {
     ThemeManager.init();
-
     // PWA Standalone Detection (iOS + Android)
     const isStandalone = 
         (window.navigator as any).standalone === true || 
@@ -49,7 +47,6 @@ function initSystem() {
     if (isStandalone) {
         document.body.classList.add('pwa-standalone');
     }
-
     // Populate Dropdown (Alphabetically Sorted)
     const codes = Object.keys(departments).sort((a, b) => a.localeCompare(b));
     if (deptDropdown) {
@@ -58,7 +55,6 @@ function initSystem() {
                 ${getDepartmentName(code, departments[code].name)} (${code})
             </div>`
         ).join("");
-        
         deptDropdown.querySelectorAll('.dropdown-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 const code = (e.currentTarget as HTMLElement).dataset.code;
@@ -66,21 +62,17 @@ function initSystem() {
             });
         });
     }
-
     loadDepartment(currentDept);
-
     deptSelector.addEventListener("click", (e) => {
         if (!(e.target as HTMLElement).closest(".dropdown-item")) {
             deptSelector.classList.toggle("active");
         }
     });
-
     document.addEventListener("click", (e) => {
         if (!deptSelector.contains(e.target as Node)) {
             deptSelector.classList.remove("active");
         }
     });
-
     // Language Button Listener
     if (langBtn) {
         setupLanguageButton(langBtn, () => {
@@ -92,7 +84,6 @@ function initSystem() {
                         ${getDepartmentName(code, departments[code].name)} (${code})
                     </div>`
                 ).join("");
-                
                  deptDropdown.querySelectorAll('.dropdown-item').forEach(item => {
                     item.addEventListener('click', (e) => {
                         const code = (e.currentTarget as HTMLElement).dataset.code;
@@ -100,24 +91,20 @@ function initSystem() {
                     });
                 });
             }
-
             updateGlobalTranslations(currentDept, departments[currentDept]?.name || "");
             loadDepartment(currentDept); 
         });
     }
     updateGlobalTranslations(currentDept, departments[currentDept]?.name || ""); // Initial text update
-
     // Transcript Import Logic
     const privacyModal = document.getElementById("privacy-modal-overlay") as HTMLDivElement;
     const closePrivacyBtn = document.getElementById("close-privacy-modal-btn") as HTMLButtonElement;
     const cancelPrivacyBtn = document.getElementById("cancel-privacy-btn") as HTMLButtonElement;
     const confirmPrivacyBtn = document.getElementById("confirm-privacy-btn") as HTMLButtonElement;
-    
     // Privacy Modal Text Elements
     const privacyTitle = document.getElementById("privacy-title") as HTMLHeadingElement;
     const privacyText = document.getElementById("privacy-text") as HTMLParagraphElement;
     const privacyWarning = document.getElementById("privacy-warning") as HTMLParagraphElement;
-
     if (importBtn && transcriptInput && privacyModal) {
         // Open Modal
         importBtn.addEventListener("click", () => {
@@ -127,15 +114,12 @@ function initSystem() {
              if (privacyWarning) privacyWarning.textContent = tPopup("privacyWarning");
              if (cancelPrivacyBtn) cancelPrivacyBtn.textContent = tPopup("cancel");
              if (confirmPrivacyBtn) confirmPrivacyBtn.textContent = tPopup("selectFile");
-             
              privacyModal.style.display = "flex";
         });
-
         // Close Modal Handlers
         const closePrivacy = () => { privacyModal.style.display = "none"; };
         closePrivacyBtn?.addEventListener("click", closePrivacy);
         cancelPrivacyBtn?.addEventListener("click", closePrivacy);
-        
         // Confirm & Trigger File Input
         confirmPrivacyBtn?.addEventListener("click", () => {
             closePrivacy();
@@ -144,14 +128,11 @@ function initSystem() {
                  transcriptInput.click();
             }, 100);
         });
-
         transcriptInput.addEventListener("change", async (e) => {
             const file = (e.target as HTMLInputElement).files?.[0];
             if (!file) return;
-
                 try {
                 const results = await parseTranscript(file);
-                
                 // Filter out invalid/non-grade entries that shouldn't affect GPA:
                 // NC (No Credit), W (Withdrawn), I (Incomplete), P (Pass), 
                 // X (In Progress), T (Transfer), ND (Not Determined), 
@@ -170,42 +151,32 @@ function initSystem() {
                     );
                     return;
                 }
-
                 // CLEAR EXISTING STATE BEFORE IMPORT
                 // This ensures transcript data is the source of truth
                 state = {};
                 saveState();
-
                 // Group results by course ID to handle duplicates (FF -> retake scenarios)
                 const courseMap = new Map<string, {course: Course, grade: string, optionIndex?: number}>();
-
                 validResults.forEach(parsed => {
                     const cleanId = parsed.id.replace(/\s+/g, ""); 
                     const upperId = cleanId.toUpperCase();
-                    
                     let targetCourse: Course | undefined;
                     let selectedOptionIndex: number | undefined = undefined;
-
                     // 1. Try Direct Match
                     targetCourse = curriculum.find(c => c.id.replace(/\s+/g, "").toUpperCase() === upperId);
-
                     // 2. If Not Found, Try Matching Options (Electives)
                     if (!targetCourse) {
                         // Check if this is an AFE course
                         const isAFECourse = /^AFE(A)?1(31|32|11|12)$/.test(upperId);
-                        
                         // Find all courses where this ID is a valid option
                         let candidates = curriculum.filter(c => 
                             c.options && c.options.some(opt => opt.id.replace(/\s+/g, "").toUpperCase() === upperId)
                         );
-                        
                         // Special handling for AFE courses: Check if we've already filled REXX1/REXX2
                         if (isAFECourse) {
                             const rexxSlots = candidates.filter(c => c.id.startsWith('REXX') && (c.id === 'REXX1' || c.id === 'REXX2'));
                             const fexxSlots = candidates.filter(c => c.id === 'FEXX1');
-                            
                             const rexxFilled = rexxSlots.filter(c => courseMap.has(c.id)).length;
-                            
                             // If 2 REXX slots already filled, prioritize FEXX1
                             if (rexxFilled >= 2 && fexxSlots.length > 0) {
                                 candidates = fexxSlots;
@@ -213,12 +184,10 @@ function initSystem() {
                                 candidates = rexxSlots.length > 0 ? rexxSlots : candidates;
                             }
                         }
-                        
                         // Special handling for departmental electives (e.g., ME 432)
                         // Prioritize REXX6-10 (Alan Seçmeli) slots based on term
                         const isDeptElective = /^[A-Z]{2,4}\d{3}$/.test(upperId) && 
                             candidates.some(c => /^REXX(6|7|8|9|10)$/.test(c.id));
-                        
                         if (isDeptElective) {
                             const deptElectiveSlots = candidates.filter(c => /^REXX(6|7|8|9|10)$/.test(c.id));
                             if (deptElectiveSlots.length > 0) {
@@ -227,7 +196,6 @@ function initSystem() {
                                 candidates = deptElectiveSlots;
                             }
                         }
-                        
                         // Select the best candidate (first one that hasn't been processed IN THIS BATCH)
                         for (const cand of candidates) {
                              if (!courseMap.has(cand.id)) {
@@ -238,7 +206,6 @@ function initSystem() {
                              }
                         }
                     }
-                    
                     if (targetCourse) {
                         // Store/Update with latest grade (last occurrence wins)
                         courseMap.set(targetCourse.id, {
@@ -248,14 +215,12 @@ function initSystem() {
                         });
                     }
                 });
-
                 // Apply all updates
                 let updatedCount = 0;
                 courseMap.forEach(({course, grade, optionIndex}) => {
                     updateState(course.id, true, grade, true, optionIndex);
                     updatedCount++;
                 });
-
                 if (updatedCount > 0) {
                      saveState();
                      render();
@@ -275,10 +240,8 @@ function initSystem() {
                         'info'
                      );
                 }
-                
                 // Clear input
                 transcriptInput.value = "";
-
             } catch (error) {
                 console.error(error);
                 showNotification(
@@ -290,18 +253,14 @@ function initSystem() {
     }
 }
 
-
-
 function switchDepartment(code: string) {
     if (!departments[code]) return;
     currentDept = code;
     localStorage.setItem("lastDept", code);
-    
     document.querySelectorAll(".dropdown-item").forEach(item => {
         item.classList.remove("selected");
         if (item.textContent?.includes(`(${code})`)) item.classList.add("selected");
     });
-    
     loadDepartment(code);
     deptSelector.classList.remove("active");
 }
@@ -312,24 +271,20 @@ function loadDepartment(code: string) {
         if (available.length > 0) return loadDepartment(available[0]);
         return;
     }
-
     const deptData = departments[code];
     updateGlobalTranslations(currentDept, deptData.name);
     curriculum = deptData.curriculum;
-
     if (typeof (window as any).gtag === 'function') {
         (window as any).gtag('event', 'view_department', {
             'department_code': code
         });
     }
-
     // Load State
     try {
         state = JSON.parse(localStorage.getItem(`gpaState_${code}`) || "{}");
     } catch {
         state = {};
     }
-
     render();
     setTimeout(() => {
         calculateOptimalZoom();
@@ -339,19 +294,14 @@ function loadDepartment(code: string) {
 
 function updateState(courseId: string, isCompleted: boolean, grade?: string, skipRender = false, selectedOptionIndex?: number) {
     if (!state[courseId]) state[courseId] = { completed: false, grade: "" };
-    
     state[courseId].completed = isCompleted;
     if (grade !== undefined) state[courseId].grade = grade;
     if (selectedOptionIndex !== undefined) state[courseId].selectedOption = selectedOptionIndex;
-    
     if (isSimulationMode) {
         state[courseId].isSimulation = isCompleted;
     }
-
     if (!isCompleted) cascadeUncheck(courseId);
-    
     saveState();
-    
     if (!skipRender) {
         render();
     }
@@ -372,7 +322,6 @@ function cascadeUncheck(courseId: string) {
 
 function saveState() {
     if (isSimulationMode) return;
-    
     // Clean up credit selections for incomplete courses (reset to default on reload)
     const cleanState = { ...state };
     for (const courseId in cleanState) {
@@ -381,34 +330,26 @@ function saveState() {
             delete cleanState[courseId].selectedCredit;
         }
     }
-    
     localStorage.setItem(`gpaState_${currentDept}`, JSON.stringify(cleanState));
 }
 
 function render() {
     const draw = () => scheduleDrawArrows({ grid, curriculum, state, isLocked: (id, c, i) => isLocked(id, curriculum, state, c, i) });
-
     calculateMetricsAndUpdateUI();
-    
     grid.innerHTML = "";
-    
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.id = "arrows-container";
     Object.assign(svg.style, { position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none", overflow: "visible" });
     grid.appendChild(svg);
-
     const terms = [1, 2, 3, 4, 5, 6, 7, 8, 9];
     terms.forEach(term => {
         const courses = curriculum.filter(c => c.term === term);
         const col = document.createElement("div");
         col.className = "term-column";
-        
         const yearNum = Math.ceil(term / 2);
         // Suffix logic only for English
         const suffix = (n: number) => n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th";
-        
         let headerText = "";
-        
         if (term === 9) {
             headerText = t("extra");
         } else {
@@ -416,18 +357,13 @@ function render() {
             const yearLabel = currentLang === 'tr' 
                 ? `${yearNum}. Sınıf` 
                 : `${yearNum}${suffix(yearNum)} Year`;
-                
             headerText = `${yearLabel} - ${season}`;
         }
-            
         col.innerHTML = `<div class="term-header"><div class="term-name" style="font-weight: 700; font-size: 0.9rem; color: var(--c-primary);">${headerText}</div></div>`;
-        
         courses.forEach(c => col.appendChild(createCard(c)));
         grid.appendChild(col);
     });
-
     setTimeout(() => draw(), 50);
-    
     // Auto-open credit dropdown if pending
     if (pendingCreditOpen) {
         setTimeout(() => {
@@ -447,22 +383,17 @@ function render() {
 function createCard(course: Course) {
     const locked = isLocked(course.id, curriculum, state);
     const data = state[course.id] || { completed: false, grade: "" };
-    
     const card = document.createElement("div");
     card.id = `card-${course.id}`;
     card.className = `course-card ${locked ? "locked" : ""} ${data.completed ? "completed" : ""} ${data.grade === "FF" ? "failed" : ""} ${data.isSimulation ? "simulation-added" : ""}`;
     if (course.name === "Summer Practice") card.classList.add("summer-practice");
-
     // --- PREREQUISITE ANALYSIS ---
     const stringPrereqs = (course.prereqs || []).filter(p => typeof p === "string") as string[];
     const complexPrereqs = (course.prereqs || []).filter(p => typeof p === "object" && p.type === "count_pattern") as any[];
-    
     const creditReqObj = stringPrereqs.find(p => p.match(/^\d+\s+Credits?$/i));
     const standardPrereqs = stringPrereqs.filter(p => !p.match(/^\d+\s+Credits?$/i));
-    
     const isSummerPractice = course.name === "Summer Practice";
     let prereqHTML = "";
-
     // Header Logic (Prereqs)
     if (!isSummerPractice) {
         if (standardPrereqs.length > 0) {
@@ -474,15 +405,12 @@ function createCard(course: Course) {
             prereqHTML = `<div class="prereq-hint" style="font-size: 0.7rem; color: var(--c-text-muted);">No Prerequisites</div>`;
         }
     }
-
     // --- CREDITS & REQUIREMENTS DISPLAY LOGIC ---
     let currentCredit = course.credits;
     let isVariable = Array.isArray(course.credits);
-    
     let displayId = course.id;
     let displayName = getCourseName(course.id, course.name);
     let selectedOptionIdx = -1;
-
     if (course.options && data.selectedOption !== undefined && course.options[data.selectedOption]) {
         const opt = course.options[data.selectedOption];
         if (opt.credits !== undefined) {
@@ -499,9 +427,7 @@ function createCard(course: Course) {
     const displayCredit = Array.isArray(currentCredit) 
         ? currentCredit[data.selectedCreditIndex ?? 0] 
         : currentCredit;
-    
     const creditDisplayParts: string[] = [];
-    
     // A) Credit Line - Variable credits show "X Credit" until grade is selected
     let showCreditLine = false;
     let crText = "";
@@ -518,7 +444,6 @@ function createCard(course: Course) {
     if (showCreditLine) {
         creditDisplayParts.push(`<span style="font-size: 0.75rem;">${crText}</span>`);
     }
-
     // B) Requirements (Stacked Logic)
     if (isSummerPractice) {
         if (standardPrereqs.length > 0 && complexPrereqs.length > 0) {
@@ -562,13 +487,10 @@ function createCard(course: Course) {
              creditDisplayParts.push(`<span style="color:${color}; font-size:0.65rem; font-weight:700;">${message} (${currentCount}/${minCount})</span>`);
         });
     }
-
     if (creditDisplayParts.length === 0 && displayCredit === 0) {
          creditDisplayParts.push("0 Credit");
     }
-
     const creditFinalHtml = creditDisplayParts.join("<br>");
-
     // Grade Color
     const getGradeColor = (g: string) => {
         const colors: Record<string, string> = { "AA": "#1fad66", "BA": "#5fbe6e", "BB": "#9fd077", "CB": "#dfe27f", "CC": "#fbcf77", "DC": "#f0975c", "DD": "#e65f41", "FF": "#dc2626" };
@@ -576,42 +498,34 @@ function createCard(course: Course) {
     };
     const finalGradeColor = data.grade === "FF" ? "#dc2626" : data.completed ? getGradeColor(data.grade) : "#cbd5e1";
     card.style.setProperty("--grade-color", finalGradeColor);
-
     // 1. Locked Icon
     const lockedIcon = document.createElement("div");
     lockedIcon.className = "locked-icon";
     lockedIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40"><path d="M12 2C9.243 2 7 4.243 7 7V10H6C4.897 10 4 10.897 4 12V20C4 21.103 4.897 22 6 22H18C19.103 22 20 21.103 20 20V12C20 10.897 19.103 10 18 10H17V7C17 4.243 14.757 2 12 2ZM12 10C12 10 9 10 9 7C9 5.346 10.346 4 12 4C13.654 4 15 5.346 15 7V10H12Z"/></svg>`;
     card.appendChild(lockedIcon);
-
     // 2. Card Header
     const cardHeader = document.createElement("div");
     cardHeader.className = "card-header";
     Object.assign(cardHeader.style, { position: "relative" });
-
     const headerContent = document.createElement("div");
     Object.assign(headerContent.style, { display: "flex", alignItems: "baseline", gap: "8px", width: "100%" });
-
     const idSpan = document.createElement("span");
     idSpan.className = "course-id";
     idSpan.textContent = displayId;
     headerContent.appendChild(idSpan);
-
     const nameDiv = document.createElement("div");
     nameDiv.className = "course-name";
     nameDiv.title = displayName;
     nameDiv.textContent = displayName;
     headerContent.appendChild(nameDiv);
-
     // Options (if any)
     if (course.options) {
         const optionsWrapper = document.createElement("div");
         optionsWrapper.className = "course-options-wrapper";
         Object.assign(optionsWrapper.style, { position: "absolute", inset: "0", opacity: "0", cursor: "pointer" });
-
         const optionsSelect = document.createElement("select");
         optionsSelect.className = "course-options-select";
         Object.assign(optionsSelect.style, { width: "100%", height: "100%", cursor: "pointer" });
-
         if (!course.options.some(o => o.name === course.name)) {
             const defaultOpt = document.createElement("option");
             defaultOpt.value = "-1";
@@ -619,7 +533,6 @@ function createCard(course: Course) {
             if (selectedOptionIdx === -1) defaultOpt.selected = true;
             optionsSelect.appendChild(defaultOpt);
         }
-
         course.options.forEach((opt, idx) => {
             const option = document.createElement("option");
             option.value = String(idx);
@@ -627,7 +540,6 @@ function createCard(course: Course) {
             if (selectedOptionIdx === idx) option.selected = true;
             optionsSelect.appendChild(option);
         });
-
         // Event Listener for Options
         optionsSelect.addEventListener("change", (e) => {
             const val = parseInt((e.target as HTMLSelectElement).value);
@@ -637,59 +549,46 @@ function createCard(course: Course) {
             render();
         });
         optionsSelect.addEventListener("click", e => e.stopPropagation());
-
         optionsWrapper.appendChild(optionsSelect);
         headerContent.appendChild(optionsWrapper);
-
         const chevron = document.createElement("div");
         chevron.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="margin-left: auto; color: var(--c-text-muted);"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
         Object.assign(chevron.style, { marginLeft: "auto" });
         headerContent.appendChild(chevron);
     }
-
     cardHeader.appendChild(headerContent);
-
     if (prereqHTML) {
         const prereqContainer = document.createElement("div");
         prereqContainer.innerHTML = prereqHTML;
         cardHeader.appendChild(prereqContainer);
     }
     card.appendChild(cardHeader);
-
-
     // 3. Card Controls
     const cardControls = document.createElement("div");
     cardControls.className = "card-controls";
-
     // Checkbox
     const label = document.createElement("label");
     label.className = "checkbox-wrapper";
-    
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.checked = data.completed;
     if (locked) checkbox.disabled = true;
-
     const customCheckbox = document.createElement("div");
     customCheckbox.className = "custom-checkbox";
     customCheckbox.innerHTML = `<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-
     label.appendChild(checkbox);
     label.appendChild(customCheckbox);
     cardControls.appendChild(label);
-
     // Grade Select (Declared early for reference)
     const gradeSelect = document.createElement("select");
     gradeSelect.className = "grade-select";
     if (locked) gradeSelect.disabled = true;
     Object.assign(gradeSelect.style, { fontWeight: "bold", color: (!data.grade || data.grade === "") ? 'var(--c-text-muted)' : finalGradeColor });
-
     const defaultGradeOpt = document.createElement("option");
     defaultGradeOpt.value = "";
     defaultGradeOpt.textContent = "--";
     if (!data.grade) defaultGradeOpt.selected = true;
     gradeSelect.appendChild(defaultGradeOpt);
-
     Object.keys(GRADES).forEach(g => {
         const opt = document.createElement("option");
         opt.value = g;
@@ -697,37 +596,30 @@ function createCard(course: Course) {
         if (data.grade === g) opt.selected = true;
         gradeSelect.appendChild(opt);
     });
-
     // Credits Display / Selector
     if (isVariable) {
         const creditWrapper = document.createElement("div");
         creditWrapper.className = "credit-selector-wrapper";
         Object.assign(creditWrapper.style, { display: "flex", alignItems: "center", gap: "2px", position: "relative" });
-
         const creditDisplay = document.createElement("span");
         creditDisplay.className = "credit-display";
         Object.assign(creditDisplay.style, { fontSize: "0.75rem", fontWeight: "600", color: data.completed ? 'var(--c-primary)' : 'var(--c-text-muted)' });
-        
         const currentArr = Array.isArray(currentCredit) ? currentCredit : [currentCredit];
         const displayVal = currentArr[data.selectedCreditIndex ?? 0];
         creditDisplay.textContent = data.completed ? `${displayVal} Credit` : 'X Credit';
-        
         const chevron = document.createElement("div");
         chevron.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" style="color: var(--c-text-muted);"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
-
         const creditSelect = document.createElement("select");
         creditSelect.className = "credit-select";
         if (!data.completed || locked) creditSelect.disabled = true;
         creditSelect.dataset.autoOpen = (data.grade && !data.selectedCreditIndex) ? 'true' : 'false';
         Object.assign(creditSelect.style, { position: "absolute", inset: "0", opacity: "0", cursor: (data.completed && !locked) ? 'pointer' : 'not-allowed', width: "100%", height: "100%" });
-
         if (!data.completed) {
             const xOpt = document.createElement("option");
             xOpt.value = "";
             xOpt.textContent = "X Credit";
             creditSelect.appendChild(xOpt);
         }
-        
         currentArr.forEach((cr, idx) => {
             const opt = document.createElement("option");
             opt.value = String(idx);
@@ -735,7 +627,6 @@ function createCard(course: Course) {
             if ((data.selectedCreditIndex ?? 0) === idx && data.completed) opt.selected = true;
             creditSelect.appendChild(opt);
         });
-
         // Credit Select Event Listener
         creditSelect.addEventListener("change", (e) => {
             e.stopPropagation();
@@ -748,12 +639,10 @@ function createCard(course: Course) {
             render();
         });
         creditSelect.addEventListener("click", e => e.stopPropagation());
-
         creditWrapper.appendChild(creditDisplay);
         creditWrapper.appendChild(chevron);
         creditWrapper.appendChild(creditSelect);
         cardControls.appendChild(creditWrapper);
-
     } else {
         const staticCredits = document.createElement("div");
         staticCredits.className = "course-credits";
@@ -761,12 +650,9 @@ function createCard(course: Course) {
         staticCredits.innerHTML = creditFinalHtml; // Kept as innerHTML for multiline BRs
         cardControls.appendChild(staticCredits);
     }
-
     cardControls.appendChild(gradeSelect);
     card.appendChild(cardControls);
-
     // --- EVENT LISTENERS (Attaching directly to variables) ---
-    
     // Checkbox Listener
     checkbox.addEventListener("change", (e) => {
         const isChecked = (e.target as HTMLInputElement).checked;
@@ -780,27 +666,21 @@ function createCard(course: Course) {
         }
         updateState(course.id, isChecked, currentGrade);
     });
-
     // Grade Select Listener
     gradeSelect.addEventListener("change", (e) => {
         const val = (e.target as HTMLSelectElement).value;
-        
         if (val !== "" && isVariable) {
             pendingCreditOpen = course.id;
         }
-        
         updateState(course.id, val !== "", val);
     });
-
     // Card Hover/Click
     card.addEventListener("mouseenter", () => highlightRelated(course.id));
     card.addEventListener("mouseleave", removeHighlights);
-    
     // Touch/Click toggle for mobile
     card.addEventListener("click", (e) => {
         // Ignore clicks on interactive elements
         if ((e.target as HTMLElement).closest('input, select, .checkbox-wrapper, .course-options-wrapper, .credit-selector-wrapper')) return;
-        
         if (currentlyHighlighted === course.id) {
             removeHighlights();
             currentlyHighlighted = null;
@@ -809,19 +689,16 @@ function createCard(course: Course) {
             currentlyHighlighted = course.id;
         }
     });
-
     return card;
 }
 
 function highlightRelated(courseId: string) {
-    resetHighlights(); // Clear previous first
-
+    resetHighlights();
     const allArrows = document.querySelectorAll(".arrow-path");
     const hasConnections = Array.from(allArrows).some(arrow => 
       arrow.getAttribute("data-source") === courseId || 
       arrow.getAttribute("data-target") === courseId
     );
-    
     const connectedCourses = new Map<string, string>();
     const forcedColors = new Map<string, string>();
 
@@ -854,29 +731,22 @@ function highlightRelated(courseId: string) {
     const darkGrayPalette = ['#565f89', '#414868', '#787c99', '#a9b1d6', '#c0caf5', '#cfc9c2', '#9aa5ce']; 
     const grayPalette = isDark ? darkGrayPalette : lightGrayPalette;
     let grayIndex = 0;
-
     allArrows.forEach((arrow) => {
         const source = arrow.getAttribute("data-source");
         const target = arrow.getAttribute("data-target");
         const isConnected = source === courseId || target === courseId;
-        
         const arrowEl = arrow as SVGPathElement;
-
         if (isConnected) {
             let arrowColor = arrow.getAttribute("data-original-color") || "var(--c-primary)";
-            
             // Override if target/source is in specific color map
             const otherId = source === courseId ? target : source;
             if (otherId && forcedColors.has(otherId)) {
                 arrowColor = forcedColors.get(otherId)!;
             }
-
             if (otherId) connectedCourses.set(otherId, arrowColor);
-            
             arrowEl.style.opacity = "1";
             arrowEl.setAttribute("stroke", arrowColor);
             arrowEl.classList.add("active");
-
             if (arrow.hasAttribute("data-d-long")) {
                  arrow.setAttribute("d", arrow.getAttribute("data-d-long")!);
             }
@@ -898,7 +768,6 @@ function highlightRelated(courseId: string) {
             otherCard.style.boxShadow = `0 0 0 2px ${highlightColor}`;
         }
     });
-    
     // Highlight SELF
     const selfCard = document.getElementById(`card-${courseId}`);
     if (selfCard) {
@@ -918,12 +787,10 @@ function resetHighlights() {
         if (originalColor) arrowEl.setAttribute("stroke", originalColor);
         arrowEl.style.opacity = ""; // Reset opacity
         arrowEl.classList.remove("active");
-        
         if (arrow.hasAttribute("data-d-short")) {
              arrow.setAttribute("d", arrow.getAttribute("data-d-short")!);
         }
     });
-
     const allCards = document.querySelectorAll(".course-card");
     allCards.forEach(card => {
         const c = card as HTMLElement;
@@ -936,7 +803,6 @@ function calculateMetricsAndUpdateUI() {
     const { earnedCredits, gpa } = calculateMetrics(curriculum, state);
     creditsEl.textContent = String(earnedCredits);
     gpaEl.textContent = gpa;
-    
     // Style GPA
     const val = parseFloat(gpa);
     if (val >= 3.5) gpaEl.style.color = "var(--c-success)";
@@ -955,18 +821,14 @@ function calculateOptimalZoom() {
     }
     const headerHeight = document.querySelector(".stats-bar")?.clientHeight || 80;
     const viewportHeight = window.innerHeight - headerHeight;
-    
     grid.style.width = ""; 
     (grid.style as any).zoom = "1"; 
-    
     const gridWidth = grid.scrollWidth;
     const gridHeight = grid.scrollHeight;
-    
     if (gridWidth <= viewportWidth && gridHeight <= viewportHeight) {
         draw();
         return;
     }
-    
     const zoomX = (viewportWidth * 0.98) / gridWidth;
     const zoomY = (viewportHeight * 0.95) / gridHeight;
     (grid.style as any).zoom = String(Math.max(0.6, Math.min(zoomX, zoomY)));
@@ -975,7 +837,6 @@ function calculateOptimalZoom() {
 
 // Arrow Draw Helper
 const draw = () => scheduleDrawArrows({ grid, curriculum, state, isLocked: (id, c, i) => isLocked(id, curriculum, state, c, i) });
-
 let resizeTimeout: number;
 window.addEventListener("resize", () => {
     clearTimeout(resizeTimeout);
@@ -996,7 +857,6 @@ function toggleSimulationMode() {
         isSimulationMode = true;
         document.body.classList.add("simulation-active");
         if (simBtn) simBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`; // X Icon
-        
         simModal.style.display = "flex";
         simTargetInput.value = "3.00";
         simCountInput.value = "6";
@@ -1019,16 +879,12 @@ if (startSimBtn) startSimBtn.addEventListener("click", () => {
     const count = parseInt(simCountInput.value);
     if (!isNaN(gpa) && !isNaN(count) && count > 0 && gpa >= 0 && gpa <= 4.0) {
         simModal.style.display = "none";
-        
         const { selectedCourses, currentPoints, currentCredits } = getSimulationCandidates(curriculum, state, count, realState!);
-        
         if (selectedCourses.length === 0) {
             alert("No available courses found!");
             return;
-        }
-        
+        }        
         calculateSimulationGrades(selectedCourses, currentPoints, currentCredits, gpa);
-        
         // Apply Changes
         selectedCourses.forEach(c => {
             if (!state[c.id]) state[c.id] = {};

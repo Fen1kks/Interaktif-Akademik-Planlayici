@@ -35,10 +35,8 @@ body {
   padding: 1rem 2rem;
   display: flex;
   flex-direction: column;
-
   justify-content: flex-start;
   align-items: stretch;
-
   margin-top: 4px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: var(--shadow-sm);
@@ -272,8 +270,8 @@ body {
 }
 
 .theme-toggle:hover {
-  background: rgba(212, 163, 115, 0.1) !important; /* Wood color background tint */
-  color: #d4a373 !important; /* Wood/Skin color */
+  background: rgba(212, 163, 115, 0.1) !important;
+  color: #d4a373 !important;
 }
 
 /* Reset Button Specifics */
@@ -334,11 +332,11 @@ body {
   align-items: flex-start;
   justify-content: flex-start;
   overflow: auto;
-  -webkit-overflow-scrolling: touch; /* Valid Mobile Scroll */
+  -webkit-overflow-scrolling: touch;
   position: relative;
   background: var(--c-bg);
   padding-top: 0;
-  padding-bottom: 0.5rem; /* Very minimal padding to forbid excess scroll */
+  padding-bottom: 0.5rem;
   width: 100%;
   min-height: 0;
 }
@@ -348,7 +346,7 @@ body {
   grid-template-columns: repeat(9, max-content);
   gap: 0 4rem;
   padding: 0 1rem 4rem 1rem;
-  position: relative; /* Anchor for absolute SVG arrows */
+  position: relative;
   transform-origin: top center;
   transition: transform 0.2s ease-out;
   margin: auto;
@@ -358,9 +356,11 @@ body {
 .curriculum-grid::-webkit-scrollbar {
   width: 8px;
 }
+
 .curriculum-grid::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .curriculum-grid::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.1);
   border-radius: 4px;
@@ -374,7 +374,7 @@ body {
   min-width: 0;
   padding: 0;
   border-right: none;
-  z-index: 2; /* Ensure columns (and cards) are above the SVG z-index */
+  z-index: 2;
 }
 
 .term-column:last-child {
@@ -392,6 +392,7 @@ body {
   border-bottom: 2px solid var(--c-surface-border);
   transition: border-color 0.2s ease;
 }
+
 .term-column:hover .term-header {
   border-color: rgba(0, 0, 0, 0.05);
 }
@@ -400,6 +401,7 @@ body {
   font-size: 0.8rem;
   padding: 4px 12px;
 }
+
 .term-name {
   font-size: 1rem;
 }
@@ -538,9 +540,11 @@ body {
   cursor: pointer;
   user-select: none;
 }
+
 .checkbox-wrapper input {
   display: none;
 }
+
 .custom-checkbox {
   width: 18px;
   height: 18px;
@@ -553,19 +557,23 @@ body {
   color: white;
   font-size: 16px;
 }
+
 .custom-checkbox svg {
   width: 14px;
   height: 14px;
   display: block;
 }
+
 .checkbox-wrapper input:checked + .custom-checkbox {
   background: var(--grade-color, var(--c-success));
   border-color: var(--grade-color, var(--c-success));
 }
+
 .checkbox-label {
   font-size: 0.8rem;
   font-weight: 500;
 }
+
 [data-theme="dark"] .checkbox-wrapper input:checked + .custom-checkbox {
   color: #000;
 }
@@ -582,17 +590,21 @@ body {
   cursor: pointer;
   transition: border-color 0.2s;
 }
+
 [data-theme="dark"] .grade-select {
   background-color: var(--c-surface);
   color: var(--c-text-main);
 }
+
 [data-theme="dark"] .grade-select option {
   background-color: var(--c-surface);
   color: var(--c-text-main);
 }
+
 .grade-select:hover {
   border-color: var(--c-primary);
 }
+
 .grade-select:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -637,6 +649,7 @@ body {
   .arrow-path {
     stroke-width: 1px !important;
   }
+
   .arrow-path.active {
     stroke-width: 2px !important;
   }
@@ -686,6 +699,7 @@ body {
     scrollbar-width: none; /* Firefox */
     overflow: auto; /* Allow scrolling */
   }
+
   .grid-wrapper::-webkit-scrollbar {
     display: none;
   }
@@ -774,11 +788,8 @@ body {
   .attribution {
     font-size: 0.65rem;
     bottom: 0.25rem;
-
-    /* Split Layout: Button Left, Text Right */
     left: 0.5rem;
     right: 0.5rem;
-
     flex-direction: row-reverse;
     justify-content: space-between;
     align-items: center;
@@ -809,9 +820,10 @@ body {
   width: 36px;
   height: 36px;
 }
+
 .lang-btn:hover {
     color: var(--c-primary);
-    background: rgba(37, 99, 235, 0.15) !important; /* Slightly more visible blue */
+    background: rgba(37, 99, 235, 0.15) !important;
 }
 
 body.simulation-active .stats-bar {
@@ -850,7 +862,6 @@ body.simulation-active .course-card.simulation-added .course-id {
 }
 
 /* --- THEME SPECIFIC OVERRIDES FOR SIMULATION --- */
-
 /* Light Theme: Darker Violet/Gray for better contrast against white */
 .theme-light body.simulation-active .course-card.simulation-added,
 .theme-rose body.simulation-active .course-card.simulation-added {
@@ -880,6 +891,7 @@ body.simulation-active .course-card.simulation-added .course-id {
     color: #475569;
     box-shadow: none;
 }
+
 /* Ensure the ID badge also turns gray/black to indicate inactivity */
 .theme-light body.simulation-active .course-card.completed:not(.simulation-added) .course-id,
 .theme-rose body.simulation-active .course-card.completed:not(.simulation-added) .course-id {

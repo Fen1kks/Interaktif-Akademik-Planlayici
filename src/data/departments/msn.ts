@@ -1,7 +1,5 @@
 import { Department, CourseOption } from '../../types';
-import { 
-    turkishPool1, englishPool 
-} from '../common';
+import { turkishPool1, englishPool } from '../common';
 import { freeElectives } from '../free-electives';
 
 // REXX3: Management / Economics

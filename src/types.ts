@@ -1,5 +1,4 @@
 export type CourseId = string;
-
 export interface ComplexPrerequisite {
     type: 'count_pattern';
     pattern: string;
@@ -9,11 +8,10 @@ export interface ComplexPrerequisite {
 }
 
 export type Prerequisite = string | ComplexPrerequisite;
-
 export interface CourseOption {
     id: string;
     name: string;
-    credits?: number | number[]; // Optional override
+    credits?: number | number[];
 }
 
 export interface Course {
@@ -23,7 +21,7 @@ export interface Course {
     prereqs: Prerequisite[];
     term: number;
     coreqs?: string[];
-    options?: CourseOption[]; // For pools like Turkish pool
+    options?: CourseOption[];
 }
 
 export interface Department {
@@ -32,7 +30,6 @@ export interface Department {
 }
 
 export type DepartmentRegistry = Record<string, Department>;
-
 export interface ThemeManager {
     init: () => void;
     toggleTheme: () => void;
@@ -45,7 +42,6 @@ declare global {
         departments: DepartmentRegistry;
         ThemeManager: ThemeManager;
         currentTotalCredits: number;
-        // Legacy support while migrating
         registerDepartment?: (code: string, data: Department) => void;
     }
 }
