@@ -52,7 +52,7 @@ export const popupTranslations: Record<string, { en: string; tr: string }> = {
 // 3. Bölüm İsimleri Sözlüğü
 export const departmentNames: Record<string, string> = {
   "BME": "Biyomedikal Mühendisliği",
-  "CHBE": "Kimya ve Biyoloji Mühendisliği",
+  "CHBE": "Kimya ve Biyoproses Mühendisliği",
   "CSE": "Bilgisayar Mühendisliği",
   "EE": "Elektrik-Elektronik Mühendisliği",
   "GBE": "Genetik ve Biyomühendislik",
