@@ -41,11 +41,6 @@ export function getDepartmentName(deptCode: string, originalName: string): strin
   return departmentNames[deptCode] || originalName;
 }
 
-// Helper Function: Get Course name
-export function getCourseName(courseId: string, originalName: string): string {
-  if (currentLang === "en") return originalName;
-  return courseNameMap[courseId] || originalName; // Returns English (original) if Turkish is not found
-}
 
 // --- UI HELPERS ---
 
@@ -80,7 +75,11 @@ export function setupLanguageButton(btn: HTMLElement, onLanguageChanged: () => v
     });
 }
 
+let activeDept = "";
+
+
 export function updateGlobalTranslations(currentDeptCode: string, originalDeptName: string) {
+    activeDept = currentDeptCode;
     // Update Metric Labels
     document.querySelectorAll(".metric-card .metric-label").forEach(el => {
         const parent = el.parentElement;
@@ -158,4 +157,15 @@ export function updateGlobalTranslations(currentDeptCode: string, originalDeptNa
     // Privacy Modal Download Section
     setText("#download-transcript-label", `📥 ${tPopup("downloadTranscript")}:`);
     setText("#recommended-tag", `(${tPopup("recommended")})`);
+}
+
+// Helper Function: Get Course name
+export function getCourseName(courseId: string, originalName: string): string {
+  if (currentLang === "en") return originalName;
+  
+  // Check for department-specific override first
+  const specificKey = `${activeDept}:${courseId}`;
+  if (courseNameMap[specificKey]) return courseNameMap[specificKey];
+  
+  return courseNameMap[courseId] || originalName; // Returns English (original) if Turkish is not found
 }

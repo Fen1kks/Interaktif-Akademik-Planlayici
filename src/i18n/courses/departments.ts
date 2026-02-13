@@ -61,7 +61,7 @@ export const deptCourseNames: Record<string, string> = {
   "ME490": "Özel Konular",
 
   // Specific Electives for ME
-  "REXX3": "Prog. Seçmeli",
-  "REXX4": "Elektronik Seçmeli",
-  "REXX5": "Yön. ve Ekon. Seç."
+  "ME:REXX3": "Prog. Seçmeli",
+  "ME:REXX4": "Elektronik Seçmeli",
+  "ME:REXX5": "Yön. ve Ekon. Seç."
 };
