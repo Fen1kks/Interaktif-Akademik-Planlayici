@@ -56,7 +56,7 @@ const chbeTechnicalElectives: CourseOption[] = [
 ].sort((a, b) => a.id.localeCompare(b.id));
 
 export const CHBE: Department = {
-    name: "Chemical Engineering",
+    name: "Chemical and Bioprocess Engineering",
     curriculum: [
       // FRESHMAN - TERM 1
       { id: "MATH131", name: "Calculus I", credits: 4, prereqs: [], term: 1 },
