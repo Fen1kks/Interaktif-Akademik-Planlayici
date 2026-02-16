@@ -308,9 +308,20 @@ function updateState(courseId: string, isCompleted: boolean, grade?: string, ski
 }
 
 function cascadeUncheck(courseId: string) {
-    const dependents = curriculum.filter(c => 
-        c.prereqs.some(p => typeof p === 'string' && p.replace("!", "") === courseId)
-    );
+    const dependents = curriculum.filter(c => {
+        // Check main prereqs
+        if (c.prereqs.some(p => typeof p === 'string' && p.replace("!", "") === courseId)) return true;
+        
+        // Check selected option prereqs
+        const s = state[c.id];
+        if (c.options && s && s.selectedOption !== undefined && c.options[s.selectedOption]) {
+             const opt = c.options[s.selectedOption];
+             if (opt.prereqs && opt.prereqs.some(p => typeof p === 'string' && p.replace("!", "") === courseId)) {
+                 return true;
+             }
+        }
+        return false;
+    });
     dependents.forEach(dep => {
         if (state[dep.id] && state[dep.id].completed) {
             state[dep.id].completed = false;
@@ -388,8 +399,18 @@ function createCard(course: Course) {
     card.className = `course-card ${locked ? "locked" : ""} ${data.completed ? "completed" : ""} ${data.grade === "FF" ? "failed" : ""} ${data.isSimulation ? "simulation-added" : ""}`;
     if (course.name === "Summer Practice") card.classList.add("summer-practice");
     // --- PREREQUISITE ANALYSIS ---
-    const stringPrereqs = (course.prereqs || []).filter(p => typeof p === "string") as string[];
-    const complexPrereqs = (course.prereqs || []).filter(p => typeof p === "object" && p.type === "count_pattern") as any[];
+    let effectivePrereqs = [...(course.prereqs || [])];
+
+    // Merge with Option Prereqs if selected
+    if (course.options && data.selectedOption !== undefined && course.options[data.selectedOption]) {
+        const opt = course.options[data.selectedOption];
+        if (opt.prereqs) {
+            effectivePrereqs = [...effectivePrereqs, ...opt.prereqs];
+        }
+    }
+
+    const stringPrereqs = effectivePrereqs.filter(p => typeof p === "string") as string[];
+    const complexPrereqs = effectivePrereqs.filter(p => typeof p === "object" && p.type === "count_pattern") as any[];
     const creditReqObj = stringPrereqs.find(p => p.match(/^\d+\s+Credits?$/i));
     const standardPrereqs = stringPrereqs.filter(p => !p.match(/^\d+\s+Credits?$/i));
     const isSummerPractice = course.name === "Summer Practice";
@@ -704,8 +725,21 @@ function highlightRelated(courseId: string) {
 
     // 1. COMPLEX PREREQUISITE HIGHLIGHTING
     const course = curriculum.find(c => c.id === courseId);
-    if (course && course.prereqs) {
-        course.prereqs.forEach(p => {
+    let effectivePrereqs = course ? [...(course.prereqs || [])] : [];
+
+    // Merge Option Prereqs if selected
+    if (course && course.options) {
+         const s = state[course.id];
+         if (s && s.selectedOption !== undefined && course.options[s.selectedOption]) {
+              const opt = course.options[s.selectedOption];
+              if (opt.prereqs) {
+                  effectivePrereqs = [...effectivePrereqs, ...opt.prereqs];
+              }
+         }
+    }
+
+    if (effectivePrereqs.length > 0) {
+        effectivePrereqs.forEach(p => {
              if (typeof p === "object" && p.type === "count_pattern") {
                  const { pattern, exclude } = p;
                  const regex = new RegExp(pattern);

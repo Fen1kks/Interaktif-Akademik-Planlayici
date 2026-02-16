@@ -4,7 +4,7 @@ import { freeElectives } from '../free-electives';
 
 // REXX4: Electrical
 const meRexxPool4: CourseOption[] = [
-    { id: "ES222", name: "Fund. of EE", credits: 3 },
+    { id: "ES222", name: "Fund. of EE", credits: 3, prereqs: ["PHYS102"] },
     { id: "EE211", name: "Circuit Theory", credits: 4 }
 ].sort((a, b) => a.id.localeCompare(b.id));
 
@@ -74,7 +74,7 @@ export const ME: Department = {
       { id: "REXX3", name: "Restricted Elective", credits: 3, prereqs: [], term: 3, options: programmingPool },
     
       // SOPHOMORE - TERM 4
-      { id: "REXX4", name: "Restricted Elective", credits: 3, prereqs: ["PHYS102"], term: 4, options: meRexxPool4 },
+      { id: "REXX4", name: "Restricted Elective", credits: 3, prereqs: [], term: 4, options: meRexxPool4 },
       { id: "ME246", name: "Strength of Materials", credits: 3, prereqs: ["ME241"], term: 4, coreqs: ["ME266"] },
       { id: "ME266", name: "Solid Lab.", credits: 2, prereqs: ["ME241"], term: 4, coreqs: ["ME246"] },
       { id: "ME244", name: "Dynamics", credits: 3, prereqs: ["ME241"], term: 4 },

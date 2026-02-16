@@ -12,6 +12,7 @@ export interface CourseOption {
     id: string;
     name: string;
     credits?: number | number[];
+    prereqs?: Prerequisite[];
 }
 
 export interface Course {

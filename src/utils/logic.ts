@@ -1,4 +1,4 @@
-import { Course, CourseId } from '../types';
+import { Course, CourseId, ComplexPrerequisite } from '../types';
 
 export const GRADES: Record<string, number> = {
   AA: 4.0, 
@@ -15,6 +15,54 @@ export function getCourse(id: CourseId, curriculum: Course[]): Course | undefine
     return curriculum.find((c) => c.id === id);
 }
 
+function checkPrerequisiteList(
+    prereqs: (string | ComplexPrerequisite)[], 
+    curriculum: Course[], 
+    state: Record<string, any>, 
+    ignoreCreditLimit: boolean, 
+    currentTotalCredits: number
+): boolean {
+    return prereqs.some((p) => {
+        // Complex Prereq (Object)
+        if (typeof p === "object" && p.type === "count_pattern") {
+             const { pattern, exclude, minCount } = p;
+             const regex = new RegExp(pattern);
+             
+             const completedCount = curriculum.filter(targetCourse => {
+                 if (!regex.test(targetCourse.id)) return false;
+                 if (exclude && exclude.includes(targetCourse.id)) return false;
+                 const s = state[targetCourse.id];
+                 return s && s.completed && s.grade !== "FF";
+             }).length;
+             
+             return completedCount < minCount;
+        }
+    
+        if (typeof p !== "string") return false;
+    
+        // Credit Req
+        const creditMatch = p.match(/^(\d+)\s+Credits?$/i);
+        if (creditMatch) {
+            if (ignoreCreditLimit) return false;
+            const required = parseInt(creditMatch[1], 10);
+            return currentTotalCredits < required;
+        }
+    
+        // Standard String Prereq
+        let pId = p;
+        let allowFF = false;
+        if (pId.endsWith("!")) {
+            pId = pId.slice(0, -1);
+            allowFF = true;
+        }
+    
+        const pState = state[pId];
+        if (!pState || pState.grade === "") return true;
+        if (allowFF) return false;
+        return !pState.completed || pState.grade === "FF";
+      });
+}
+
 export function isLocked(
     courseId: CourseId, 
     curriculum: Course[],
@@ -26,50 +74,22 @@ export function isLocked(
   const course = getCourse(courseId, curriculum);
   if (!course) return false;
 
-  // 1. Check Own Prereqs
-  const ownLocked = course.prereqs.some((p) => {
-    // Complex Prereq (Object)
-    if (typeof p === "object" && p.type === "count_pattern") {
-         const { pattern, exclude, minCount } = p;
-         const regex = new RegExp(pattern);
-         
-         const completedCount = curriculum.filter(targetCourse => {
-             if (!regex.test(targetCourse.id)) return false;
-             if (exclude && exclude.includes(targetCourse.id)) return false;
-             const s = state[targetCourse.id];
-             return s && s.completed && s.grade !== "FF";
-         }).length;
-         
-         return completedCount < minCount;
-    }
+  const s = state[courseId];
 
-    if (typeof p !== "string") return false;
+  // 1. Check Main Course Prereqs
+  if (checkPrerequisiteList(course.prereqs, curriculum, state, ignoreCreditLimit, currentTotalCredits)) {
+      return true;
+  }
 
-    // Credit Req
-    const creditMatch = p.match(/^(\d+)\s+Credits?$/i);
-    if (creditMatch) {
-        if (ignoreCreditLimit) return false;
-        const required = parseInt(creditMatch[1], 10);
-        return currentTotalCredits < required;
-    }
+  // 2. Check Option Prereqs (if selected)
+  if (course.options && s && s.selectedOption !== undefined && course.options[s.selectedOption]) {
+      const selectedOpt = course.options[s.selectedOption];
+      if (selectedOpt.prereqs && checkPrerequisiteList(selectedOpt.prereqs, curriculum, state, ignoreCreditLimit, currentTotalCredits)) {
+          return true;
+      }
+  }
 
-    // Standard String Prereq
-    let pId = p;
-    let allowFF = false;
-    if (pId.endsWith("!")) {
-        pId = pId.slice(0, -1);
-        allowFF = true;
-    }
-
-    const pState = state[pId];
-    if (!pState || pState.grade === "") return true;
-    if (allowFF) return false;
-    return !pState.completed || pState.grade === "FF";
-  });
-  
-  if (ownLocked) return true;
-
-  // 2. Check Co-reqs
+  // 3. Check Co-reqs
   if (checkCoreqs && course.coreqs && course.coreqs.length > 0) {
       const coreqLocked = course.coreqs.some(cString => {
           const coreqId = cString.replace("!", "");

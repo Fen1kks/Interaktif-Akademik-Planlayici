@@ -118,7 +118,18 @@ export function drawArrows({ grid, curriculum, state, isLocked }: ArrowParams) {
 
     curriculum.forEach((course) => {
         if (!cardCache.has(course.id)) return;
-        course.prereqs.forEach((pString) => {
+        
+        // Merge Main Prereqs + Option Prereqs
+        let effectivePrereqs = [...(course.prereqs || [])];
+        const s = state[course.id];
+        if (course.options && s && s.selectedOption !== undefined && course.options[s.selectedOption]) {
+            const opt = course.options[s.selectedOption];
+            if (opt.prereqs) {
+                effectivePrereqs = [...effectivePrereqs, ...opt.prereqs];
+            }
+        }
+
+        effectivePrereqs.forEach((pString) => {
             if (typeof pString !== 'string') return;
             if (pString.match(/^\d+\s+Credits?$/i)) return;
             const prereqId = pString.replace("!", "");
@@ -141,12 +152,21 @@ export function drawArrows({ grid, curriculum, state, isLocked }: ArrowParams) {
     const horizontalLanes: Record<string, any[]> = {};
 
     curriculum.forEach((course) => {
-        if (!course.prereqs.length || !cardCache.has(course.id)) return;
+        const s = state[course.id];
+        let effectivePrereqs = [...(course.prereqs || [])];
+        if (course.options && s && s.selectedOption !== undefined && course.options[s.selectedOption]) {
+            const opt = course.options[s.selectedOption];
+            if (opt.prereqs) {
+                effectivePrereqs = [...effectivePrereqs, ...opt.prereqs];
+            }
+        }
+
+        if (!effectivePrereqs.length || !cardCache.has(course.id)) return;
         const targetMetrics = cardCache.get(course.id);
         const targetX = targetMetrics.x;
         const targetYBase = targetMetrics.cy;
 
-        course.prereqs.forEach((pString) => {
+        effectivePrereqs.forEach((pString) => {
             if (typeof pString !== 'string') return;
             const isWeak = pString.endsWith("!");
             const prereqId = pString.replace("!", "");
