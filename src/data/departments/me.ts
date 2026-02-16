@@ -74,7 +74,7 @@ export const ME: Department = {
       { id: "REXX3", name: "Restricted Elective", credits: 3, prereqs: [], term: 3, options: programmingPool },
     
       // SOPHOMORE - TERM 4
-      { id: "REXX4", name: "Restricted Elective", credits: 3, prereqs: [], term: 4, options: meRexxPool4 },
+      { id: "REXX4", name: "Restricted Elective", credits: 3, prereqs: ["PHYS102"], term: 4, options: meRexxPool4 },
       { id: "ME246", name: "Strength of Materials", credits: 3, prereqs: ["ME241"], term: 4, coreqs: ["ME266"] },
       { id: "ME266", name: "Solid Lab.", credits: 2, prereqs: ["ME241"], term: 4, coreqs: ["ME246"] },
       { id: "ME244", name: "Dynamics", credits: 3, prereqs: ["ME241"], term: 4 },
