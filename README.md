@@ -6,11 +6,11 @@ Projeyi hemen dene: [İnteraktif Akademik Planlayıcı](https://fen1kks.github.i
 
 ## 📝 Kısa Özet
 
-Makine Mühendisliği öğrencileri için özel olarak geliştirilmiş; ders ön koşullarını görselleştiren, akademik rotanızı planlamanızı sağlayan ve gelecekteki not ortalamanızı simüle eden interaktif bir web aracı.
+Mühendislik öğrencileri için özel olarak geliştirilmiş; ders ön koşullarını görselleştiren, akademik rotanızı planlamanızı sağlayan ve gelecekteki not ortalamanızı simüle eden interaktif bir web aracı.
 
 ## 📥 Kurulum ve Çalıştırma
 
-Proje artık **Vite + TypeScript** altyapısını kullanmaktadır. Geliştirme ortamını kurmak için:
+Proje **Vite + TypeScript** altyapısını kullanmaktadır. Geliştirme ortamını kurmak için:
 
 1.  **Bağımlılıkları Yükle:**
     ```bash
@@ -40,8 +40,8 @@ Ders seçim dönemlerinde hangi dersin hangisine bağlı olduğunu (prerequisite
 
 ### 🎯 Temel Özellikler
 
-- **🔗 İnteraktif Ön Koşul Ağacı:** Bir dersin üzerine geldiğinizde, o derse bağlı olan veya o dersin açtığı tüm dersleri dinamik oklarla görselleştirir.
-- **🧮 Akıllı GPA Simülasyonu:** Geçmiş derslerinizi ve almayı planladığınız derslerin notlarını girerek kümülatif ortalamanızı (CGPA) anlık olarak hesaplayın.
+- **🔗 İnteraktif Ön Koşul Ağacı:** Bir dersin üzerine geldiğinizde, o derse bağlı olan veya o dersin açtığı tüm dersleri dinamik oklarla görselleştirir. Bağlantılı dersler zincirleme olarak vurgulanır, ilgisiz dersler otomatik olarak soluklaştırılır.
+- **🧮 Akıllı GPA Simülasyonu:** Geçmiş derslerinizi ve almayı planladığınız derslerin notlarını girerek kümülatif ortalamanızı (CGPA) anlık olarak hesaplayın. Simülasyon modunda hedef GPA belirleyin veya notları manuel girin.
 - **🔒 Kilit Sistemi (Logic Lock):** Henüz ön koşulunu vermediğiniz bir dersi seçmenizi engelleyerek hatalı program yapma riskini ortadan kaldırır.
 - **💾 LocalStorage Teknolojisi:** Üyelik gerektirmez! Tüm verileriniz sadece kendi tarayıcınızda saklanır ve sayfayı yenilediğinizde kaybolmaz.
 - **🎨 Gelişmiş Tema Sistemi:** Göz yormayan "Karanlık Mod", ferah "Aydınlık Mod" ve özel "Rose" teması seçenekleriyle kişiselleştirilebilir deneyim.
@@ -52,8 +52,9 @@ Ders seçim dönemlerinde hangi dersin hangisine bağlı olduğunu (prerequisite
 - **⚡ Eş Koşul (Co-requisite) Desteği:** Laboratuvar ve teorik dersler gibi birlikte alınması gereken dersleri otomatik olarak tanır ve uyarır.
 - **⚠️ Zayıf Ön Koşul (Weak Prerequisite):** Dersi geçmiş olmanız gerekmez; sadece almış olmanız (FF olsa bile) yeterlidir.
 - **🔢 Sayısal Ön Koşul (Count Pattern):** "En az 5 adet ME3XX dersi" gibi esnek ön koşul kurallarını destekler.
+- **📌 Seçmeli Ön Koşulları:** Seçmeli havuzundaki bireysel ders seçenekleri kendi ön koşullarına sahip olabilir; havuzdan seçim yapılırken ön koşul uyumu dinamik olarak kontrol edilir.
 
-### 📄 PDF Transkript Yükleme (YENİ!)
+### 📄 PDF Transkript Yükleme
 
 - **📂 Tek Tıkla İçe Aktarma:** Okul portalından (OBS) veya e-Devlet'ten indirdiğiniz PDF transkriptinizi sisteme yükleyerek tüm derslerinizi saniyeler içinde işleyin.
 - **🔒 Gizlilik Odaklı:** Transkriptiniz **asla** bir sunucuya yüklenmez. Tüm işlem tarayıcınızda (Client-Side) gerçekleşir.
@@ -85,25 +86,63 @@ Ders seçim dönemlerinde hangi dersin hangisine bağlı olduğunu (prerequisite
 - **TypeScript** - Tip güvenliği ve ölçeklenebilirlik
 - **HTML5 & CSS3** - Modern HSL Renk Paleti, Flexbox/Grid Layout
 - **SVG** - Dinamik Bezier Eğrileri ile Ok Çizimi
-- **Modüler Mimari** - Ayrıştırılmış veri ve logic katmanları
+- **PDF.js** - Client-Side PDF işleme (Transkript İçe Aktarma)
+- **Modüler Mimari** - Ayrıştırılmış veri, logic ve feature katmanları
 
-## 🏗️ Veri Mimarisi
+## 🏗️ Proje Mimarisi
 
-Proje, **`src/data/`** altında modüler bir yapı kullanır:
+Proje, `src/` altında katmanlı bir modüler yapı kullanır:
 
-- **`src/data/departments/*.ts`** - Her bölümün özel müfredatı (ME, CSE vb.) **burada bulunur**.
-- **`src/data/common.ts`** - Ortak havuzlar (İngilizce, Programlama, Teknik Seçmeliler)
-- **`src/data/registry.ts`** - Bölüm kayıt sistemi
-- **`src/i18n/*.ts`** - Dil ve çeviri dosyaları (Ders isimleri, arayüz metinleri)
-- **`src/utils/logic.ts`** - Hesaplama ve kilit mantığı (Saf fonksiyonlar)
-- **`src/utils/visuals.ts`** - Görselleştirme motoru
-- **`src/utils/theme.ts`** - Tema yöneticisi
-- **`src/utils/transcript-parser.ts`** - PDF İşleme motoru
+```
+src/
+├── main.ts                         # Uygulama giriş noktası ve başlatma
+├── types.ts                        # Ortak tip tanımları (Course, Department vb.)
+│
+├── core/                           # Çekirdek modüller
+│   ├── state.ts                    # Uygulama durum yönetimi (localStorage, dil, tema)
+│   ├── render.ts                   # DOM oluşturma ve ders kartı renderlama
+│   └── department.ts               # Bölüm yükleme ve değiştirme mantığı
+│
+├── features/                       # Özellik modülleri
+│   ├── card.ts                     # Ders kartı etkileşimleri (tıklama, seçme, not)
+│   ├── highlights.ts               # Ön koşul vurgulama ve soluklaştırma motoru
+│   ├── simulation.ts               # GPA simülasyon modu mantığı
+│   ├── transcript-import.ts        # PDF transkript içe aktarma arayüzü
+│   ├── reset.ts                    # Veri sıfırlama
+│   └── zoom.ts                     # Yakınlaştırma/Uzaklaştırma kontrolü
+│
+├── utils/                          # Yardımcı fonksiyonlar
+│   ├── logic.ts                    # Hesaplama ve kilit mantığı (Saf fonksiyonlar)
+│   ├── visuals.ts                  # Görselleştirme motoru (ok çizimi, highlight)
+│   ├── theme.ts                    # Tema yöneticisi
+│   └── transcript-parser.ts        # PDF işleme motoru
+│
+├── data/                           # Veri katmanı
+│   ├── departments/*.ts            # Her bölümün özel müfredatı (ME, CSE vb.)
+│   ├── common.ts                   # Ortak havuzlar (İngilizce, Programlama, Teknik Seçmeliler)
+│   ├── free-electives.ts           # Serbest seçmeli havuzu (500+ ders)
+│   └── registry.ts                 # Bölüm kayıt sistemi
+│
+├── i18n/                           # Çoklu dil desteği
+│   ├── index.ts                    # Dil yöneticisi ve çeviri fonksiyonları
+│   ├── ui.ts                       # Arayüz metinleri ve bölüm isimleri
+│   └── courses/                    # Ders ismi çevirileri
+│       ├── common.ts               # Ortak ders çevirileri
+│       ├── departments.ts          # Bölüme özel ders çevirileri
+│       └── free.ts                 # Serbest seçmeli çevirileri
+│
+├── components/                     # UI bileşenleri
+│   └── modals/                     # Modal diyaloglar
+│
+└── assets/                         # Statik kaynaklar
+    └── styles/
+        ├── style.css               # Ana stil dosyası
+        └── theme.css               # Tema değişkenleri
+```
 
 ## 🗺️ Gelecek Planları (Roadmap)
 
 - **🔄 Çift Anadal (ÇAP) Sistemi:** İki farklı bölümün ders programını aynı anda görüntüleme ve çakışma kontrolü.
-
 
 ---
 

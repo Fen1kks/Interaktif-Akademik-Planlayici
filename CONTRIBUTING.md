@@ -7,10 +7,12 @@ Bu proje **Vite** ve **TypeScript** altyapısını kullanmaktadır. İster kod g
 ## 📋 İçindekiler
 
 1. [🚀 Kurulum ve Geliştirme Ortamı](#-kurulum-ve-geliştirme-ortamı)
-2. [🎓 Yeni Bölüm Ekleme](#-yeni-bölüm-ekleme)
-3. [📊 Veri Yapısı ve Kurallar](#-veri-yapısı-ve-kurallar)
-4. [📚 Seçmeli Havuzları](#-seçmeli-havuzları)
-5. [🧪 Test Etme ve Gönderme](#-test-etme-ve-gönderme)
+2. [🏗️ Proje Yapısı](#-proje-yapısı)
+3. [🎓 Yeni Bölüm Ekleme](#-yeni-bölüm-ekleme)
+4. [📊 Veri Yapısı ve Kurallar](#-veri-yapısı-ve-kurallar)
+5. [📚 Seçmeli Havuzları](#-seçmeli-havuzları)
+6. [🌍 Çoklu Dil Desteği (i18n)](#-çoklu-dil-desteği-i18n)
+7. [🧪 Test Etme ve Gönderme](#-test-etme-ve-gönderme)
 
 ---
 
@@ -27,10 +29,38 @@ Projeyi yerel bilgisayarınızda çalıştırmak için aşağıdaki adımları i
 1. **Projeyi Klonlayın:**
    ```bash
    git clone https://github.com/fen1kks/Interaktif-Akademik-Planlayici .
+   ```
 2. **Bağımlılıkları Yükleyin:**
    ```bash
    npm install
+   ```
 3. **Geliştirme Sunucusunu Başlatın:** Kodlamaya başlamak için bu komutu çalıştırın. Tarayıcınızda otomatik olarak açılacaktır (Genellikle `http://localhost:5173`).
+   ```bash
+   npm run dev
+   ```
+
+---
+
+## 🏗️ Proje Yapısı
+
+Koda katkıda bulunmadan önce proje mimarisini anlamak faydalı olacaktır:
+
+| Dizin / Dosya | Açıklama |
+| --- | --- |
+| `src/main.ts` | Uygulama giriş noktası ve başlatma |
+| `src/types.ts` | Ortak tip tanımları (`Course`, `Department`, `CourseOption`) |
+| `src/core/` | Çekirdek modüller: durum yönetimi (`state.ts`), DOM renderlama (`render.ts`), bölüm yükleme (`department.ts`) |
+| `src/features/` | Özellik modülleri: ders kartı etkileşimi, vurgulama, simülasyon, transkript, sıfırlama, zoom |
+| `src/utils/` | Yardımcı fonksiyonlar: hesaplama mantığı, görselleştirme motoru, tema, PDF ayrıştırma |
+| `src/data/` | Veri katmanı: bölüm müfredatları, ortak havuzlar, serbest seçmeliler |
+| `src/data/departments/` | Her bölümün özel müfredatı (ME, CSE, EE, CHBE vb.) |
+| `src/data/common.ts` | Ortak havuzlar (İngilizce, Programlama, Teknik Seçmeliler) |
+| `src/data/free-electives.ts` | Serbest seçmeli havuzu (500+ ders) |
+| `src/data/registry.ts` | Bölüm kayıt sistemi |
+| `src/i18n/` | Dil ve çeviri dosyaları |
+| `src/assets/styles/` | CSS dosyaları (`style.css`, `theme.css`) |
+
+---
 
 ## 🎓 Yeni Bölüm Ekleme
 
@@ -96,9 +126,9 @@ export const departments: DepartmentRegistry = {
 
 ## 📊 Veri Yapısı Açıklaması
 
-Tüm veriler `src/types.ts` dosyasındaki `Course` ve `Department` arayüzlerine uygun olmalıdır.
+Tüm veriler `src/types.ts` dosyasındaki `Course`, `Department` ve `CourseOption` arayüzlerine uygun olmalıdır.
 
-### Zorunlu Alanlar
+### `Course` — Zorunlu Alanlar
 
 | Alan      | Tip          | Açıklama                                                  |
 | --------- | ------------ | --------------------------------------------------------- |
@@ -108,12 +138,26 @@ Tüm veriler `src/types.ts` dosyasındaki `Course` ve `Department` arayüzlerine
 | `prereqs` | Array        | Ön koşul ders kodları listesi                             |
 | `term`    | Number       | Dönem numarası (1-8 normal, 9 ekstra)                     |
 
-### İsteğe Bağlı Alanlar
+### `Course` — İsteğe Bağlı Alanlar
 
 | Alan      | Tip   | Açıklama                                  |
 | --------- | ----- | ----------------------------------------- |
 | `coreqs`  | Array | Eş koşul dersleri (aynı dönemde alınmalı) |
 | `options` | Array | Seçmeli ders havuzu referansı             |
+
+### `CourseOption` — Seçmeli Ders Seçenekleri
+
+Seçmeli havuzlardaki her bir ders seçeneği `CourseOption` tipindedir:
+
+| Alan      | Tip          | Zorunlu | Açıklama                                         |
+| --------- | ------------ | ------- | ------------------------------------------------ |
+| `id`      | String       | ✅      | Ders kodu (örn: "ME301")                         |
+| `name`    | String       | ✅      | Ders adı                                         |
+| `credits` | Number/Array | ❌      | Kredi sayısı (varsayılan: üst ders kredisi)      |
+| `prereqs` | Array        | ❌      | Bu seçeneğe özel ön koşullar (bağımsız kontrol)  |
+
+> [!TIP]
+> `CourseOption` içindeki `prereqs` sayesinde, bir seçmeli havuzundaki her bir ders seçeneği kendi ön koşullarına sahip olabilir. Havuzdan seçim yapılırken ön koşul uyumu dinamik olarak kontrol edilir.
 
 ---
 
@@ -164,6 +208,18 @@ prereqs: [
 ];
 ```
 
+### 5. Seçmeli Ön Koşulları (Option Prerequisites)
+
+Seçmeli havuzundaki bireysel ders seçeneklerine özel ön koşul tanımlama:
+
+```typescript
+const meRexxPool4: CourseOption[] = [
+  { id: "ME450", name: "Advanced Dynamics", credits: 3, prereqs: ["ME301"] },
+  { id: "ME460", name: "Robotics", credits: 3, prereqs: ["ME301", "EE101"] },
+  { id: "ME470", name: "CFD", credits: 3 }, // Ön koşulsuz
+];
+```
+
 ---
 
 ## 📚 Seçmeli Havuzları
@@ -185,7 +241,6 @@ options: programmingPool
 // Teknik Seçmeliler
 options: commonTechnicalElectives
 
-// Serbest Seçmeliler
 // Serbest Seçmeliler
 options: freeElectives
 ```
@@ -238,6 +293,13 @@ export const deptCourseNames: Record<string, string> = {
 };
 ```
 
+### 3. Ortak ve Serbest Seçmeli Çevirileri
+
+Ortak dersler ve serbest seçmeliler için ayrı dosyalar bulunur:
+
+- **`src/i18n/courses/common.ts`** — Ortak ders çevirileri (İngilizce, Programlama havuzları vb.)
+- **`src/i18n/courses/free.ts`** — Serbest seçmeli ders çevirileri
+
 ---
 
 ## 🧪 Test Etme
@@ -261,6 +323,8 @@ Tarayıcıda şunları kontrol edin:
 - Eklediğiniz bölüm listede çıkıyor mu?
 - Dersler doğru dönemlerde mi?
 - Okların ve kilitlerin doğru çalışıyor mu?
+- Ders vurgulamaları (highlight/dim) beklendiği gibi mi?
+- Simülasyon modu doğru hesaplama yapıyor mu?
 
 ---
 
