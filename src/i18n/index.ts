@@ -148,6 +148,20 @@ export function updateGlobalTranslations(currentDeptCode: string, originalDeptNa
     // Privacy Modal Download Section
     setText("#download-transcript-label", `📥 ${tPopup("downloadTranscript")}:`);
     setText("#recommended-tag", `(${tPopup("recommended")})`);
+
+    // Import Transcript Button
+    const importBtn = document.getElementById("import-transcript-btn");
+    if (importBtn) {
+        importBtn.title = t("importTranscript");
+        importBtn.ariaLabel = t("importTranscript");
+    }
+
+    // Privacy Modal
+    setText("#privacy-title", tPopup("privacyTitle"));
+    setText("#privacy-text", tPopup("privacyText"));
+    setText("#privacy-warning", tPopup("privacyWarning"));
+    setText("#cancel-privacy-btn", tPopup("cancel"));
+    setText("#confirm-privacy-btn", tPopup("selectFile"));
 }
 
 // Helper Function: Get Course name

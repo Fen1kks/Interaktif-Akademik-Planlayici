@@ -2,6 +2,7 @@
 export const uiTranslations: Record<string, { en: string; tr: string }> = {
   department: { en: "Department of", tr: "Bölümü" },
   credits: { en: "Credits", tr: "Kredi" },
+  importTranscript: { en: "Import Transcript", tr: "Transkript Yükle" },
   reset: { en: "Reset All Data", tr: "Verileri Sıfırla" },
   theme: { en: "Select Theme", tr: "Tema Seç" },
   simulation: { en: "Simulation Mode", tr: "Simülasyon Modu" },
@@ -16,7 +17,7 @@ export const uiTranslations: Record<string, { en: string; tr: string }> = {
   prereqs: { en: "Prereqs", tr: "Önkoşul" },
   coreqs: { en: "Coreqs", tr: "Eşkoşul" },
   search: { en: "Search...", tr: "Ara..." },
-  appTitle: { en: "Academic Planner & GPA Forecaster", tr: "Akademik Planlayıcı & Ortalama Hesaplayıcı" }
+  appTitle: { en: "Academic Planner & GPA Forecaster", tr: "Akademik Planlayıcı & Ortalama Hesaplayıcı" },
 };
 
 // 2. Popup / Modal Metinleri

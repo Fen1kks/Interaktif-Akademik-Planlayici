@@ -23,11 +23,9 @@ function checkPrerequisiteList(
     currentTotalCredits: number
 ): boolean {
     return prereqs.some((p) => {
-        // Complex Prereq (Object)
         if (typeof p === "object" && p.type === "count_pattern") {
              const { pattern, exclude, minCount } = p;
              const regex = new RegExp(pattern);
-             
              const completedCount = curriculum.filter(targetCourse => {
                  if (!regex.test(targetCourse.id)) return false;
                  if (exclude && exclude.includes(targetCourse.id)) return false;
@@ -40,7 +38,6 @@ function checkPrerequisiteList(
     
         if (typeof p !== "string") return false;
     
-        // Credit Req
         const creditMatch = p.match(/^(\d+)\s+Credits?$/i);
         if (creditMatch) {
             if (ignoreCreditLimit) return false;
@@ -48,7 +45,6 @@ function checkPrerequisiteList(
             return currentTotalCredits < required;
         }
     
-        // Standard String Prereq
         let pId = p;
         let allowFF = false;
         if (pId.endsWith("!")) {
@@ -106,7 +102,6 @@ export function calculateMetrics(curriculum: Course[], state: Record<string, any
   let weightedSum = 0;
   let earnedCredits = 0;
 
-  // Calculate Earned & Weighted
   Object.keys(state).forEach((id) => {
     const s = state[id];
     const course = getCourse(id, curriculum);
@@ -128,7 +123,6 @@ export function calculateMetrics(curriculum: Course[], state: Record<string, any
       }
       
       if (s.grade && s.grade !== "" && GRADES[s.grade] !== undefined) {
-        // Only count towards GPA if credit > 0
         if (availableCredits > 0) {
             weightedSum += availableCredits * GRADES[s.grade];
             totalCredits += availableCredits;
@@ -141,7 +135,6 @@ export function calculateMetrics(curriculum: Course[], state: Record<string, any
   return { earnedCredits, gpa };
 }
 
-// Simulation Logic
 export function getSimulationCandidates(
     curriculum: Course[], 
     state: Record<string, any>, 
@@ -172,6 +165,7 @@ export function getSimulationCandidates(
 
     // 2. Filter Candidates
     const candidates = curriculum.filter(c => {
+        if (c.term === 9) return false;
         if (c.name && c.name.toLowerCase().includes("summer practice")) return false;
         if (isLocked(c.id, curriculum, state, true, false, currentCredits)) return false;  
         
@@ -181,7 +175,6 @@ export function getSimulationCandidates(
         return false;
     });
 
-    // 3. Sort
     candidates.sort((a, b) => {
         const stateA = state[a.id];
         const stateB = state[b.id];
@@ -192,7 +185,6 @@ export function getSimulationCandidates(
         return a.term - b.term;
     });
 
-    // 4. Select N
     const selectedCourses: any[] = [];
     const selectedIds = new Set<string>();
 
@@ -243,11 +235,9 @@ export function calculateSimulationGrades(
     const requiredTotalPoints = targetGPA * totalCredits;
     const requiredNewPoints = requiredTotalPoints - currentPoints;
     const requiredAvg = newCredits > 0 ? requiredNewPoints / newCredits : 0;
-
     const gradeKeys = Object.keys(GRADES).sort((a,b) => GRADES[a] - GRADES[b]);
     const gradeScores = gradeKeys.map(k => GRADES[k]);
 
-    // Initial Floor
     let initialGrade = "DD";
     let initialScore = 1.0;
     for (let i = 0; i < gradeKeys.length; i++) {
@@ -262,7 +252,6 @@ export function calculateSimulationGrades(
         c._simScore = initialScore;
     });
 
-    // Optimization
     const getCurrentNewPoints = () => selectedCourses.reduce((acc, c) => acc + (c._simScore * c._simCredits), 0);
     
     let safety = 0;
@@ -274,13 +263,11 @@ export function calculateSimulationGrades(
         for (const c of selectedCourses) {
             const currentIdx = gradeKeys.indexOf(c._simGrade);
             if (currentIdx >= gradeKeys.length - 1) continue;
-            
             const nextScore = gradeScores[currentIdx + 1];
             const diff = (nextScore - c._simScore) * c._simCredits;
             const predicted = getCurrentNewPoints() + diff;
             const overshoot = predicted - requiredNewPoints;
             
-            // Prefer moves that barely cross the threshold (minOvershoot)
             if (predicted >= requiredNewPoints) {
                  if (overshoot < minOvershoot) {
                      minOvershoot = overshoot;

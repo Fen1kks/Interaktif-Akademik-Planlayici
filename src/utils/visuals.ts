@@ -1,6 +1,5 @@
 import { Course, CourseId } from '../types';
 
-// Constants
 const ARROW_MARGIN = 1;
 
 interface ArrowParams {
@@ -20,7 +19,6 @@ export function scheduleDrawArrows(params: ArrowParams) {
     });
 }
 
-// Helpers
 function getRelativePos(el: HTMLElement, root: HTMLElement) {
     let x = 0;
     let y = 0;
@@ -87,7 +85,6 @@ export function drawArrows({ grid, curriculum, state, isLocked }: ArrowParams) {
     const svg = document.getElementById("arrows-container");
     if (!svg) return;
     svg.innerHTML = "";
-    
     svg.style.width = "0px";
     svg.style.height = "0px";
     svg.setAttribute("width", "0");
@@ -119,7 +116,6 @@ export function drawArrows({ grid, curriculum, state, isLocked }: ArrowParams) {
     curriculum.forEach((course) => {
         if (!cardCache.has(course.id)) return;
         
-        // Merge Main Prereqs + Option Prereqs
         let effectivePrereqs = [...(course.prereqs || [])];
         const s = state[course.id];
         if (course.options && s && s.selectedOption !== undefined && course.options[s.selectedOption]) {
@@ -135,7 +131,6 @@ export function drawArrows({ grid, curriculum, state, isLocked }: ArrowParams) {
             const prereqId = pString.replace("!", "");
             if (course.coreqs && course.coreqs.includes(prereqId)) return;
             if (!cardCache.has(prereqId)) return;
-
             if (!outgoing.has(prereqId)) outgoing.set(prereqId, []);
             outgoing.get(prereqId)!.push(course.id);
             if (!incoming.has(course.id)) incoming.set(course.id, []);
@@ -171,23 +166,20 @@ export function drawArrows({ grid, curriculum, state, isLocked }: ArrowParams) {
             const isWeak = pString.endsWith("!");
             const prereqId = pString.replace("!", "");
             if (!cardCache.has(prereqId)) return;
-
             const sourceMetrics = cardCache.get(prereqId);
             const sourceX = sourceMetrics.cx;
             const sourceYBase = sourceMetrics.cy;
-
             const gap = targetX - sourceX;
             const arrowId = `${prereqId}-${course.id}`;
             const outList = outgoing.get(prereqId) || [];
             const inList = incoming.get(course.id) || [];
-            
             const outOffset = (outList.indexOf(course.id) - (outList.length - 1) / 2) * laneSpacing;
             const inOffset = (inList.indexOf(prereqId) - (inList.length - 1) / 2) * laneSpacing;
-
             const sourceY = sourceYBase + outOffset;
             const targetY = targetYBase + inOffset;
             let hopY = targetY;
 
+            // Gap > 60px means cross-column: use horizontal routing through gaps
             if (gap > 60) {
                 const blockStart = sourceX + 10;
                 const blockEnd = targetX;
@@ -232,12 +224,10 @@ export function drawArrows({ grid, curriculum, state, isLocked }: ArrowParams) {
         });
     });
 
-    // DRAW PHASE
     Object.values(verticalLanes).flat().forEach(arrow => {
         const { sourceX, sourceY, targetX, targetY, hopY, gap, id, courseId, prereqId, isWeak } = arrow;
         const channelOffset = gutterAssignments[id] || 0;
         const gapOffset = gapAssignments[id] || 0;
-        
         const isMobile = window.innerWidth <= 900;
         const gutterBase = isMobile ? 18 : 32;
         const r = 8;
@@ -281,8 +271,6 @@ export function drawArrows({ grid, curriculum, state, isLocked }: ArrowParams) {
 
         const prereqState = state[prereqId];
         const isPrereqCompleted = prereqState && prereqState.completed && prereqState.grade !== "FF";
-        
-        // Co-req Sync Check
         const course = curriculum.find(c => c.id === courseId);
         const isCoreq = course && course.coreqs && course.coreqs.includes(prereqId);
         let strokeColor = generateStableColor(prereqId);
@@ -314,7 +302,6 @@ export function drawArrows({ grid, curriculum, state, isLocked }: ArrowParams) {
         svg.appendChild(path);
     });
 
-    // CO-REQUISITES (Double Lines)
     curriculum.forEach(course => {
         if (!course.coreqs || !course.coreqs.length) return;
         const sourceMetrics = cardCache.get(course.id);
@@ -324,21 +311,17 @@ export function drawArrows({ grid, curriculum, state, isLocked }: ArrowParams) {
             const isWeak = cString.endsWith("!");
             const coreqId = cString.replace("!", "");
             if (course.id > coreqId) return; // Draw only once
-
             const targetMetrics = cardCache.get(coreqId);
             if (!targetMetrics) return;
-
             const isSourceHigher = sourceMetrics.y < targetMetrics.y;
             const top = isSourceHigher ? sourceMetrics : targetMetrics;
             const bot = isSourceHigher ? targetMetrics : sourceMetrics;
-
             const xSource = top.x + top.w / 2;
             const ySource = top.y + top.h;
             const xTarget = bot.x + bot.w / 2;
             const yTarget = bot.y;
             const pairColor = generateStableColor(course.id + coreqId);
             const isPairLocked = isLocked(course.id, false) || isLocked(coreqId, false);
-            
             const offsets = [-3, 3];
             offsets.forEach(off => {
                 const d = `M ${xSource + off} ${ySource} L ${xTarget + off} ${yTarget}`;
@@ -369,7 +352,6 @@ export function drawArrows({ grid, curriculum, state, isLocked }: ArrowParams) {
     });
 }
 
-// Toast Notifications
 export function showNotification(message: string, type: 'success' | 'error' | 'info' = 'info', duration = 3000) {
     const container = document.getElementById("notification-container");
     if (!container) return;
@@ -377,7 +359,6 @@ export function showNotification(message: string, type: 'success' | 'error' | 'i
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
     
-    // Icon based on type
     let icon = "";
     if (type === 'success') icon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--c-success)"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
     else if (type === 'error') icon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--c-danger)"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
@@ -389,13 +370,11 @@ export function showNotification(message: string, type: 'success' | 'error' | 'i
         <button class="toast-close">✕</button>
     `;
 
-    // Close logic
     const closeBtn = toast.querySelector(".toast-close");
     closeBtn?.addEventListener("click", () => removeToast(toast));
 
     container.appendChild(toast);
 
-    // Auto remove
     setTimeout(() => {
         removeToast(toast);
     }, duration);
