@@ -91,7 +91,7 @@ export const ME: Department = {
     
       // JUNIOR - TERM 6
       { id: "REXX6", name: "Restricted Elective", credits: 3, prereqs: [], term: 6, options: meTechnicalElectives },
-      { id: "ME344", name: "Machine Elm. II", credits: 3, prereqs: ["ME246"], term: 6 },
+      { id: "ME344", name: "Machine Elm. II", credits: 3, prereqs: ["ME344"], term: 6 },
       { id: "ME352", name: "System Dynamics", credits: 4, prereqs: ["ME244", "MATH241"], term: 6 },
       { id: "ME324", name: "Heat Transfer", credits: 4, prereqs: ["ME333"], term: 6 },
       { id: "FEXX2", name: "Free Elective", credits: 3, prereqs: [], term: 6, options: freeElectives },
