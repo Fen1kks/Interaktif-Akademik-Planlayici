@@ -21,8 +21,8 @@ interface Route {
     vS?: VSeg; vT?: VSeg;
 }
 
-// One vertical line in a column gutter. Arrows of the same colour (same prereq) share one line.
-interface VSeg { g: number; color: string; a: number; b: number; x: number }
+// One vertical line in a column gutter. Arrows of the same prereq share one line.
+interface VSeg { g: number; owner: string; a: number; b: number; x: number }
 
 let drawRequestId: number | null = null;
 
@@ -206,7 +206,7 @@ export function drawArrows({ grid, curriculum, state, isLocked }: ArrowParams) {
                 isWeak: pString.endsWith("!"), color, sc, tc,
                 sx: source.cx, sy: source.cy + outOffset,
                 // same-column / backwards arrows enter the target from its right side
-                tx: tc > sc ? target.x : target.cx, ty: target.cy + inOffset,
+                tx: tc > sc ? target.x : target.cx, ty: target.cy + inOffset + 2.5, // +2.5 keeps entry lanes off exit lanes of the same-row card next door
                 mode: tc > sc + 1 ? 'long' : tc === sc + 1 ? 'adj' : 'back',
                 chanY: 0, chanH: 0
             });
@@ -218,30 +218,31 @@ export function drawArrows({ grid, curriculum, state, isLocked }: ArrowParams) {
         const gaps = freeGaps(cards, colRight[r.sc] + 1, colLeft[r.tc] - 1, scrollHeight);
         let best = { s: r.ty - 3, e: r.ty + 3 }, bestDist = Infinity;
         gaps.forEach(g => {
-            const dist = Math.abs((g.s + g.e) / 2 - r.ty);
+            const c = (g.s + g.e) / 2; // least total vertical travel
+            const dist = Math.abs(c - r.sy) + Math.abs(c - r.ty);
             if (dist < bestDist) { bestDist = dist; best = g; }
         });
         r.chanY = (best.s + best.e) / 2;
         r.chanH = best.e - best.s;
     });
 
-    // --- 3. vertical lines in gutters; same gutter + same colour = one shared line ---
+    // --- 3. vertical lines in gutters; same gutter + same prereq = one shared line ---
     const vSegs = new Map<string, VSeg>();
-    const addV = (g: number, color: string, y1: number, y2: number) => {
-        const key = `${g}|${color}`;
-        const a = Math.min(y1, y2) - 6, b = Math.max(y1, y2) + 6;
+    const addV = (g: number, owner: string, y1: number, y2: number) => {
+        const key = `${g}|${owner}`;
+        const a = Math.min(y1, y2) - 14, b = Math.max(y1, y2) + 14; // slack covers the later lane offset of corridors
         const seg = vSegs.get(key);
         if (seg) { seg.a = Math.min(seg.a, a); seg.b = Math.max(seg.b, b); return seg; }
-        const created = { g, color, a, b, x: 0 };
+        const created = { g, owner, a, b, x: 0 };
         vSegs.set(key, created);
         return created;
     };
     routes.forEach(r => {
         if (r.mode === 'long') {
-            r.vS = addV(r.sc, r.color, r.sy, r.chanY);
-            r.vT = addV(r.tc - 1, r.color, r.chanY, r.ty);
+            r.vS = addV(r.sc, r.prereqId, r.sy, r.chanY);
+            r.vT = addV(r.tc - 1, r.prereqId, r.chanY, r.ty);
         } else {
-            r.vS = addV(r.sc, r.color, r.sy, r.ty);
+            r.vS = addV(r.sc, r.prereqId, r.sy, r.ty);
         }
     });
     const byGutter = new Map<number, VSeg[]>();
