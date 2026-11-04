@@ -213,17 +213,25 @@ export function drawArrows({ grid, curriculum, state, isLocked }: ArrowParams) {
         });
     });
 
+    // a near-level adjacent arrow becomes a perfectly straight line (no tiny step)
+    routes.forEach(r => { if (r.mode === 'adj' && Math.abs(r.ty - r.sy) < 4) r.ty = r.sy; });
+
     // --- 2. long arrows: pick a corridor between cards of the columns they fly over ---
+    const SHARE_BONUS = 90; // detour we accept to reuse a corridor the same prereq already uses
+    const usedGaps = new Map<string, Set<number>>();
     routes.filter(r => r.mode === 'long').forEach(r => {
         const gaps = freeGaps(cards, colRight[r.sc] + 1, colLeft[r.tc] - 1, scrollHeight);
-        let best = { s: r.ty - 3, e: r.ty + 3 }, bestDist = Infinity;
+        const used = usedGaps.get(r.prereqId) || new Set<number>();
+        let best = { s: r.ty - 3, e: r.ty + 3 }, bestCost = Infinity;
         gaps.forEach(g => {
             const c = (g.s + g.e) / 2; // least total vertical travel
-            const dist = Math.abs(c - r.sy) + Math.abs(c - r.ty);
-            if (dist < bestDist) { bestDist = dist; best = g; }
+            const cost = Math.abs(c - r.sy) + Math.abs(c - r.ty) - (used.has(Math.round(c / 8)) ? SHARE_BONUS : 0);
+            if (cost < bestCost) { bestCost = cost; best = g; }
         });
         r.chanY = (best.s + best.e) / 2;
         r.chanH = best.e - best.s;
+        used.add(Math.round(r.chanY / 8));
+        usedGaps.set(r.prereqId, used);
     });
 
     // --- 3. vertical lines in gutters; same gutter + same prereq = one shared line ---
@@ -260,11 +268,16 @@ export function drawArrows({ grid, curriculum, state, isLocked }: ArrowParams) {
         byChannel.get(key)!.push(r);
     });
     byChannel.forEach(list => {
-        const { idx, count } = assignTracks(list.map(r => ({
-            a: Math.min(r.vS!.x, r.vT!.x), b: Math.max(r.vS!.x, r.vT!.x)
+        // arrows of one prereq in one corridor ride a single shared lane
+        const groups = new Map<string, Route[]>();
+        list.forEach(r => { if (!groups.has(r.prereqId)) groups.set(r.prereqId, []); groups.get(r.prereqId)!.push(r); });
+        const gl = [...groups.values()];
+        const { idx, count } = assignTracks(gl.map(g => ({
+            a: Math.min(...g.map(r => Math.min(r.vS!.x, r.vT!.x))),
+            b: Math.max(...g.map(r => Math.max(r.vS!.x, r.vT!.x)))
         })));
         const step = Math.min(6, (Math.min(...list.map(r => r.chanH)) - 2) / count);
-        list.forEach((r, i) => { r.chanY += (idx[i] - (count - 1) / 2) * step; });
+        gl.forEach((g, i) => { const base = g[0].chanY; g.forEach(r => { r.chanY = base + (idx[i] - (count - 1) / 2) * step; }); });
     });
 
     // --- 5. draw ---
